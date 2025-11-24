@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us – UNI Events</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  
+  <!-- API Configuration - Set this in Netlify environment variables -->
+  <script>
+    window.API_BASE_URL = window.API_BASE_URL || 'https://your-backend.railway.app';
+  </script>
+  <script src="config.js"></script>
+</head>
+
+<body>
+  <div class="hero-decor hero-decor--left">
+    <img src="assets/images/hero-decor-left.png" alt="" aria-hidden="true">
+  </div>
+  <div class="hero-decor hero-decor--right">
+    <img src="assets/images/hero-decor-right.png" alt="" aria-hidden="true">
+  </div>
+
+  <header class="site-header" id="top">
+    <a class="logo" href="index.html">
+      <img src="assets/images/logo.png" alt="UNI Events logo">
+      <span>UNI Events</span>
+    </a>
+    <nav aria-label="Primary">
+      <a href="events.html">Events</a>
+      <a href="blog.html">Blog</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="header-auth" id="header-auth">
+      <a class="btn btn-outline" href="auth.html" id="login-btn">Login</a>
+      <div class="profile-dropdown hidden" id="profile-dropdown">
+        <button class="profile-trigger" id="profile-trigger" type="button">
+          <div class="profile-avatar">
+            <span id="profile-initials">U</span>
+          </div>
+          <span id="profile-name">User</span>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="profile-menu" id="profile-menu">
+          <a href="profile.html" class="profile-menu-item" id="view-profile-btn">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 8C10.2091 8 12 6.20914 12 4C12 1.79086 10.2091 0 8 0C5.79086 0 4 1.79086 4 4C4 6.20914 5.79086 8 8 8Z" fill="currentColor"/>
+              <path d="M8 10C4.68629 10 2 12.6863 2 16H14C14 12.6863 11.3137 10 8 10Z" fill="currentColor"/>
+            </svg>
+            View Profile
+          </a>
+          <button class="profile-menu-item" type="button" id="logout-btn">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 14H3C2.44772 14 2 13.5523 2 13V3C2 2.44772 2.44772 2 3 2H6M10 12L14 8M14 8L10 4M14 8H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="event-details">
+      <div class="event-details__content">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Get in Touch</p>
+            <h1>Contact Us</h1>
+            <p>Have questions or need assistance? We're here to help!</p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 2rem;">
+          <div class="event-details__section">
+            <h3>General Inquiries</h3>
+            <p>For general questions about events, registration, or platform usage:</p>
+            <p><strong>Email:</strong> info@unievents.lk</p>
+            <p><strong>Phone:</strong> +94 11 234 5678</p>
+          </div>
+
+          <div class="event-details__section">
+            <h3>Event Organizers</h3>
+            <p>Want to list your event on our platform?</p>
+            <p><strong>Email:</strong> events@unievents.lk</p>
+            <p><strong>Phone:</strong> +94 11 234 5679</p>
+          </div>
+
+          <div class="event-details__section">
+            <h3>Technical Support</h3>
+            <p>Experiencing technical issues?</p>
+            <p><strong>Email:</strong> support@unievents.lk</p>
+            <p><strong>Response Time:</strong> Within 24 hours</p>
+          </div>
+        </div>
+
+        <div class="event-details__section" style="margin-top: 2rem;">
+          <h3>Send Us a Message</h3>
+          <form class="auth-form" id="contact-form" style="max-width: 600px;">
+            <label class="form-field">
+              <span>Your Name</span>
+              <input type="text" name="name" required>
+            </label>
+            <label class="form-field">
+              <span>Your Email</span>
+              <input type="email" name="email" required>
+            </label>
+            <label class="form-field">
+              <span>Subject</span>
+              <input type="text" name="subject" required>
+            </label>
+            <label class="form-field">
+              <span>Message</span>
+              <textarea name="message" rows="5" style="resize: vertical; font-family: inherit;" required></textarea>
+            </label>
+            <button class="btn btn-primary" type="submit">Send Message</button>
+            <p class="form-alert" data-contact-alert></p>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer__top">
+      <div>
+        <a class="logo" href="index.html">
+          <img src="assets/images/logo.png" alt="UNI Events logo">
+          <span>UNI Events</span>
+        </a>
+        <p>Eventick is a global self-service ticketing platform for live experiences.</p>
+        <div class="socials">
+          <a href="#" aria-label="Facebook">
+            <img src="assets/images/icon-facebook.svg" alt="" aria-hidden="true">
+          </a>
+          <a href="#" aria-label="Twitter">
+            <img src="assets/images/icon-twitter.svg" alt="" aria-hidden="true">
+          </a>
+          <a href="#" aria-label="LinkedIn">
+            <img src="assets/images/icon-linkedin.svg" alt="" aria-hidden="true">
+          </a>
+        </div>
+      </div>
+      <div>
+        <h3>Marketplace</h3>
+        <ul>
+          <li><a href="events.html">Browse Events</a></li>
+          <li><a href="index.html#upcoming">Upcoming Events</a></li>
+          <li><a href="blog.html">Blog</a></li>
+          <li><a href="about.html">About Us</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>My Account</h3>
+        <ul>
+          <li><a href="auth.html">Login</a></li>
+          <li><a href="auth.html">Register</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+          <li><a href="index.html#contact">Help Center</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Stay in the Loop</h3>
+        <p>Join our mailing list for event drops.</p>
+        <button class="btn btn-outline" type="button">Subscribe</button>
+      </div>
+    </div>
+    <div class="site-footer__bottom">
+      <p>© 2025 UNI Events. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/script.js" defer></script>
+  <script>
+    document.getElementById('contact-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const alert = document.querySelector('[data-contact-alert]');
+      const submitBtn = form.querySelector('button[type="submit"]');
+      
+      // Get form data
+      const formData = new FormData(form);
+      const data = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        subject: formData.get('subject'),
+        message: formData.get('message')
+      };
+      
+      // Show loading state
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending...';
+      alert.textContent = 'Sending your message...';
+      alert.dataset.state = 'info';
+      alert.style.display = 'block';
+      
+      try {
+        const API_BASE = window.API_BASE || 'http://localhost:4400';
+        const response = await fetch(`${API_BASE}/api/contact`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to send message');
+        }
+        
+        alert.textContent = result.message || 'Thank you for your message! We will get back to you soon.';
+        alert.dataset.state = 'success';
+        form.reset();
+      } catch (error) {
+        console.error('Contact form error:', error);
+        alert.textContent = `❌ ${error.message || 'Failed to send message. Please try again.'}`;
+        alert.dataset.state = 'error';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send Message';
+      }
+    });
+  </script>
+</body>
+
+</html>
+

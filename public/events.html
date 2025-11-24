@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Events – UNI Events</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  
+  <!-- API Configuration - Set this in Netlify environment variables -->
+  <script>
+    window.API_BASE_URL = window.API_BASE_URL || 'https://your-backend.railway.app';
+  </script>
+  <script src="config.js"></script>
+</head>
+
+<body>
+  <div class="hero-decor hero-decor--left">
+    <img src="assets/images/hero-decor-left.png" alt="" aria-hidden="true">
+  </div>
+  <div class="hero-decor hero-decor--right">
+    <img src="assets/images/hero-decor-right.png" alt="" aria-hidden="true">
+  </div>
+
+  <header class="site-header" id="top">
+    <a class="logo" href="index.html">
+      <img src="assets/images/logo.png" alt="UNI Events logo">
+      <span>UNI Events</span>
+    </a>
+    <nav aria-label="Primary">
+      <a href="events.html">Events</a>
+      <a href="blog.html">Blog</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="header-auth" id="header-auth">
+      <a class="btn btn-outline" href="auth.html" id="login-btn">Login</a>
+      <div class="profile-dropdown hidden" id="profile-dropdown">
+        <button class="profile-trigger" id="profile-trigger" type="button">
+          <div class="profile-avatar">
+            <span id="profile-initials">U</span>
+          </div>
+          <span id="profile-name">User</span>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="profile-menu" id="profile-menu">
+          <a href="profile.html" class="profile-menu-item" id="view-profile-btn">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 8C10.2091 8 12 6.20914 12 4C12 1.79086 10.2091 0 8 0C5.79086 0 4 1.79086 4 4C4 6.20914 5.79086 8 8 8Z" fill="currentColor"/>
+              <path d="M8 10C4.68629 10 2 12.6863 2 16H14C14 12.6863 11.3137 10 8 10Z" fill="currentColor"/>
+            </svg>
+            View Profile
+          </a>
+          <button class="profile-menu-item" type="button" id="logout-btn">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 14H3C2.44772 14 2 13.5523 2 13V3C2 2.44772 2.44772 2 3 2H6M10 12L14 8M14 8L10 4M14 8H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="events-page">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Discover</p>
+          <h1>All Events</h1>
+          <p>Browse through all upcoming events across Sri Lankan universities</p>
+        </div>
+        <button class="btn btn-primary" id="request-event-btn" type="button">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          Request Event
+        </button>
+      </div>
+
+      <div class="events-filters">
+        <div class="filter-group">
+          <label for="category-filter">Category:</label>
+          <select id="category-filter" class="filter-select">
+            <option value="">All Categories</option>
+            <option value="Music">Music</option>
+            <option value="Competition">Competition</option>
+            <option value="Conference">Conference</option>
+            <option value="Workshop">Workshop</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="status-filter">Status:</label>
+          <select id="status-filter" class="filter-select">
+            <option value="">All Status</option>
+            <option value="upcoming">Upcoming</option>
+            <option value="ongoing">Ongoing</option>
+            <option value="past">Past</option>
+          </select>
+        </div>
+        <div class="filter-group filter-group--search">
+          <label for="search-input" class="sr-only">Search events</label>
+          <input type="text" id="search-input" class="filter-search" placeholder="Search events...">
+        </div>
+      </div>
+
+      <div class="events-grid" id="events-grid">
+        <div class="loading-state">Loading events...</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer__top">
+      <div>
+        <a class="logo" href="index.html">
+          <img src="assets/images/logo.png" alt="UNI Events logo">
+          <span>UNI Events</span>
+        </a>
+        <p>Eventick is a global self-service ticketing platform for live experiences.</p>
+        <div class="socials">
+          <a href="#" aria-label="Facebook">
+            <img src="assets/images/icon-facebook.svg" alt="" aria-hidden="true">
+          </a>
+          <a href="#" aria-label="Twitter">
+            <img src="assets/images/icon-twitter.svg" alt="" aria-hidden="true">
+          </a>
+          <a href="#" aria-label="LinkedIn">
+            <img src="assets/images/icon-linkedin.svg" alt="" aria-hidden="true">
+          </a>
+        </div>
+      </div>
+      <div>
+        <h3>Marketplace</h3>
+        <ul>
+          <li><a href="events.html">Browse Events</a></li>
+          <li><a href="index.html#upcoming">Upcoming Events</a></li>
+          <li><a href="blog.html">Blog</a></li>
+          <li><a href="about.html">About Us</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>My Account</h3>
+        <ul>
+          <li><a href="auth.html">Login</a></li>
+          <li><a href="auth.html">Register</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+          <li><a href="index.html#contact">Help Center</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Stay in the Loop</h3>
+        <p>Join our mailing list for event drops.</p>
+        <button class="btn btn-outline" type="button">Subscribe</button>
+      </div>
+    </div>
+    <div class="site-footer__bottom">
+      <p>© 2025 UNI Events. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Request Event Modal -->
+  <div class="request-event-modal" id="request-event-modal" style="display: none;">
+    <div class="request-event-modal__overlay" id="request-event-modal-overlay"></div>
+    <div class="request-event-modal__content">
+      <button class="request-event-modal__close" id="request-event-modal-close" type="button" aria-label="Close modal">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <h2>Request an Event</h2>
+      <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 1.5rem;">Submit an event request for admin review. We'll notify you once it's approved.</p>
+      
+      <form id="request-event-form" class="auth-form">
+        <label class="form-field">
+          <span>Event Title *</span>
+          <input type="text" name="title" placeholder="e.g., Annual Music Festival" required>
+        </label>
+        <label class="form-field">
+          <span>Subtitle</span>
+          <input type="text" name="subtitle" placeholder="e.g., By Engineering Department">
+        </label>
+        <label class="form-field">
+          <span>Description *</span>
+          <textarea name="description" placeholder="Describe your event..." rows="4" required></textarea>
+        </label>
+        <label class="form-field">
+          <span>Category *</span>
+          <select name="category" required>
+            <option value="">Select Category</option>
+            <option value="Music">Music</option>
+            <option value="Competition">Competition</option>
+            <option value="Conference">Conference</option>
+            <option value="Workshop">Workshop</option>
+            <option value="Sports">Sports</option>
+            <option value="Cultural">Cultural</option>
+            <option value="Other">Other</option>
+          </select>
+        </label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <label class="form-field">
+            <span>Date *</span>
+            <input type="date" name="date" required>
+          </label>
+          <label class="form-field">
+            <span>Time *</span>
+            <input type="time" name="time" required>
+          </label>
+        </label>
+        <label class="form-field">
+          <span>Location *</span>
+          <input type="text" name="location" placeholder="e.g., University of Moratuwa" required>
+        </label>
+        <label class="form-field">
+          <span>Venue</span>
+          <input type="text" name="venue" placeholder="e.g., Main Auditorium">
+        </label>
+        <label class="form-field">
+          <span>Organizer *</span>
+          <input type="text" name="organizer" placeholder="e.g., Engineering Department" required>
+        </label>
+        <label class="form-field">
+          <span>Your Email *</span>
+          <input type="email" name="requesterEmail" placeholder="your@email.com" required>
+        </label>
+        <label class="form-field">
+          <span>Additional Notes</span>
+          <textarea name="notes" placeholder="Any additional information..." rows="3"></textarea>
+        </label>
+        <button class="btn btn-primary" type="submit">Submit Request</button>
+        <p class="form-alert" data-request-alert></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Booking Modal -->
+  <div class="booking-modal" id="booking-modal" style="display: none;">
+    <div class="booking-modal__overlay" id="booking-modal-overlay"></div>
+    <div class="booking-modal__content">
+      <button class="booking-modal__close" id="booking-modal-close" type="button" aria-label="Close booking">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <h2 id="booking-modal-title">Book Event</h2>
+      <p id="booking-modal-price" style="margin: 0.5rem 0 1.5rem; font-size: 1.1rem; font-weight: 600;"></p>
+      <form id="booking-form" class="booking-form">
+        <div class="form-field">
+          <label class="checkbox-field">
+            <input type="checkbox" id="volunteer-checkbox" name="isVolunteer">
+            <span>Participate as Volunteer</span>
+          </label>
+        </div>
+
+        <div id="volunteer-fields" style="display: none;">
+          <div class="form-field">
+            <label for="semester">Semester *</label>
+            <input type="text" id="semester" name="semester" placeholder="e.g., 1st Semester">
+          </div>
+          <div class="form-field">
+            <label for="batch">Batch *</label>
+            <input type="text" id="batch" name="batch" placeholder="e.g., 2024">
+          </div>
+          <div class="form-field">
+            <label for="faculty">Faculty *</label>
+            <input type="text" id="faculty" name="faculty" placeholder="e.g., Engineering">
+          </div>
+          <div class="form-field">
+            <label for="reason">Reason for Volunteering *</label>
+            <textarea id="reason" name="reason" rows="3" placeholder="Why do you want to volunteer?"></textarea>
+          </div>
+        </div>
+
+        <div id="payment-section" style="display: none;">
+          <div class="form-field">
+            <label>Payment Method *</label>
+            <div class="radio-group">
+              <label class="radio-field">
+                <input type="radio" name="paymentMethod" value="card">
+                <span>Credit/Debit Card</span>
+              </label>
+              <label class="radio-field">
+                <input type="radio" name="paymentMethod" value="bank">
+                <span>Bank Transfer</span>
+              </label>
+              <label class="radio-field">
+                <input type="radio" name="paymentMethod" value="cash">
+                <span>Cash on Site</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <p class="form-alert" data-booking-alert></p>
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+          <button class="btn btn-primary" type="submit">Confirm Booking</button>
+          <button class="btn btn-outline" type="button" id="cancel-booking-btn">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/events.js" defer></script>
+  <script>
+    // Initialize API_BASE if events.js needs it before script.js loads
+    // This prevents conflicts with resolveApiBase
+    if (typeof window.API_BASE === 'undefined') {
+      const origin = window.location.origin;
+      const port = window.location.port;
+      if (port && (port.startsWith('55') || port === '5500' || port === '5501' || port === '5502')) {
+        window.API_BASE = 'http://localhost:4400';
+      } else if (origin.includes('5500') || origin.includes('127.0.0.1:5500')) {
+        window.API_BASE = 'http://localhost:4400';
+      } else {
+        window.API_BASE = origin || 'http://localhost:4400';
+      }
+    }
+  </script>
+  <script src="js/script.js" defer></script>
+</body>
+
+</html>
+

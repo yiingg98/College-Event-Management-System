@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UNI Events · Login & Register</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  
+  <!-- API Configuration - Set this in Netlify environment variables -->
+  <script>
+    window.API_BASE_URL = window.API_BASE_URL || 'https://your-backend.railway.app';
+  </script>
+  <script src="config.js"></script>
+</head>
+
+<body class="auth-page">
+  <header class="site-header auth-header">
+    <a class="logo" href="index.html">
+      <img src="assets/images/logo.png" alt="UNI Events logo">
+      <span>UNI Events</span>
+    </a>
+    <nav aria-label="Primary">
+      <a href="index.html#events">Events</a>
+      <a href="blog.html">Blog</a>
+      <a href="index.html#about">About</a>
+      <a href="index.html#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main class="auth-container">
+    <section class="auth-card">
+      <div>
+        <p class="eyebrow">New here?</p>
+        <h1>Create your profile</h1>
+        <p>Register once to track your tickets, favorite events, and exclusive campus drops.</p>
+        <form id="register-form" class="auth-form" autocomplete="off">
+          <label class="form-field">
+            <span>Full Name</span>
+            <input type="text" name="name" placeholder="Mavisuru Ragasoba" required>
+          </label>
+          <label class="form-field">
+            <span>Email</span>
+            <input type="email" name="email" placeholder="you@university.ac.lk" required>
+          </label>
+          <label class="form-field">
+            <span>Password</span>
+            <div class="password-input-wrapper">
+              <input type="password" name="password" id="register-password" placeholder="Minimum 6 characters" minlength="6" required>
+              <button type="button" class="password-toggle" id="register-password-toggle" aria-label="Show password">
+                <svg class="password-toggle-icon password-toggle-icon--hide" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                  <path d="M10 3C5.58172 3 1.93548 5.90323 0.5 10C1.93548 14.0968 5.58172 17 10 17C14.4183 17 18.0645 14.0968 19.5 10C18.0645 5.90323 14.4183 3 10 3ZM10 15C7.79086 15 6 13.2091 6 11C6 8.79086 7.79086 7 10 7C12.2091 7 14 8.79086 14 11C14 13.2091 12.2091 15 10 15ZM10 8.5C8.61929 8.5 7.5 9.61929 7.5 11C7.5 12.3807 8.61929 13.5 10 13.5C11.3807 13.5 12.5 12.3807 12.5 11C12.5 9.61929 11.3807 8.5 10 8.5Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                </svg>
+                <svg class="password-toggle-icon password-toggle-icon--show" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2.85355 2.14645C2.65829 1.95118 2.34171 1.95118 2.14645 2.14645C1.95118 2.34171 1.95118 2.65829 2.14645 2.85355L17.1464 17.8536C17.3417 18.0488 17.6583 18.0488 17.8536 17.8536C18.0488 17.6583 18.0488 17.3417 17.8536 17.1464L2.85355 2.14645Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                  <path d="M10 3C5.58172 3 1.93548 5.90323 0.5 10C1.93548 14.0968 5.58172 17 10 17C11.3807 17 12.6583 16.6129 13.8536 16.1464L12.1464 14.4392C11.3417 14.7806 10.6583 15 10 15C7.79086 15 6 13.2091 6 11C6 10.3417 6.21935 9.65829 6.56078 8.85355L4.85355 7.14645C3.3871 8.34171 3 9.61929 3 11C3 13.2091 4.79086 15 7 15H10C11.3807 15 12.6583 14.6129 13.8536 14.1464L15.5608 15.8536C14.2194 16.7806 12.6583 17 10 17C5.58172 17 1.93548 14.0968 0.5 10C1.93548 5.90323 5.58172 3 10 3Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                </svg>
+              </button>
+            </div>
+          </label>
+          <label class="form-field">
+            <span>Student ID Document</span>
+            <input type="file" name="studentIdFile" accept="image/*,.pdf" required>
+            <small style="color: rgba(255, 255, 255, 0.6); font-size: 0.85rem; margin-top: 0.25rem; display: block;">
+              Upload a photo or PDF of your student ID for verification (Max 5MB)
+            </small>
+          </label>
+          <button class="btn btn-primary" type="submit">Register</button>
+          <p class="form-alert" data-register-alert></p>
+        </form>
+      </div>
+    </section>
+
+    <section class="auth-card">
+      <div>
+        <p class="eyebrow">Welcome back</p>
+        <h1>Login to manage your events</h1>
+        <p>Access your saved happenings, RSVP lists, and ticket downloads.</p>
+        <form id="login-form" class="auth-form" autocomplete="off">
+          <label class="form-field">
+            <span>Email</span>
+            <input type="email" name="email" placeholder="you@university.ac.lk" required>
+          </label>
+          <label class="form-field">
+            <span>Password</span>
+            <div class="password-input-wrapper">
+              <input type="password" name="password" id="login-password" placeholder="••••••" required>
+              <button type="button" class="password-toggle" id="login-password-toggle" aria-label="Show password">
+                <svg class="password-toggle-icon password-toggle-icon--hide" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                  <path d="M10 3C5.58172 3 1.93548 5.90323 0.5 10C1.93548 14.0968 5.58172 17 10 17C14.4183 17 18.0645 14.0968 19.5 10C18.0645 5.90323 14.4183 3 10 3ZM10 15C7.79086 15 6 13.2091 6 11C6 8.79086 7.79086 7 10 7C12.2091 7 14 8.79086 14 11C14 13.2091 12.2091 15 10 15ZM10 8.5C8.61929 8.5 7.5 9.61929 7.5 11C7.5 12.3807 8.61929 13.5 10 13.5C11.3807 13.5 12.5 12.3807 12.5 11C12.5 9.61929 11.3807 8.5 10 8.5Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                </svg>
+                <svg class="password-toggle-icon password-toggle-icon--show" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2.85355 2.14645C2.65829 1.95118 2.34171 1.95118 2.14645 2.14645C1.95118 2.34171 1.95118 2.65829 2.14645 2.85355L17.1464 17.8536C17.3417 18.0488 17.6583 18.0488 17.8536 17.8536C18.0488 17.6583 18.0488 17.3417 17.8536 17.1464L2.85355 2.14645Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                  <path d="M10 3C5.58172 3 1.93548 5.90323 0.5 10C1.93548 14.0968 5.58172 17 10 17C11.3807 17 12.6583 16.6129 13.8536 16.1464L12.1464 14.4392C11.3417 14.7806 10.6583 15 10 15C7.79086 15 6 13.2091 6 11C6 10.3417 6.21935 9.65829 6.56078 8.85355L4.85355 7.14645C3.3871 8.34171 3 9.61929 3 11C3 13.2091 4.79086 15 7 15H10C11.3807 15 12.6583 14.6129 13.8536 14.1464L15.5608 15.8536C14.2194 16.7806 12.6583 17 10 17C5.58172 17 1.93548 14.0968 0.5 10C1.93548 5.90323 5.58172 3 10 3Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                </svg>
+              </button>
+            </div>
+          </label>
+          <button class="btn btn-outline" type="submit">Login</button>
+          <p class="form-alert" data-login-alert></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer auth-footer">
+    <div class="site-footer__bottom">
+      <p>© 2025 UNI Events. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/auth.js" defer></script>
+</body>
+
+</html>
+

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us – UNI Events</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  
+  <!-- API Configuration - Set this in Netlify environment variables -->
+  <script>
+    window.API_BASE_URL = window.API_BASE_URL || 'https://your-backend.railway.app';
+  </script>
+  <script src="config.js"></script>
+</head>
+
+<body>
+  <div class="hero-decor hero-decor--left">
+    <img src="assets/images/hero-decor-left.png" alt="" aria-hidden="true">
+  </div>
+  <div class="hero-decor hero-decor--right">
+    <img src="assets/images/hero-decor-right.png" alt="" aria-hidden="true">
+  </div>
+
+  <header class="site-header" id="top">
+    <a class="logo" href="index.html">
+      <img src="assets/images/logo.png" alt="UNI Events logo">
+      <span>UNI Events</span>
+    </a>
+    <nav aria-label="Primary">
+      <a href="events.html">Events</a>
+      <a href="blog.html">Blog</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="header-auth" id="header-auth">
+      <a class="btn btn-outline" href="auth.html" id="login-btn">Login</a>
+      <div class="profile-dropdown hidden" id="profile-dropdown">
+        <button class="profile-trigger" id="profile-trigger" type="button">
+          <div class="profile-avatar">
+            <span id="profile-initials">U</span>
+          </div>
+          <span id="profile-name">User</span>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="profile-menu" id="profile-menu">
+          <a href="profile.html" class="profile-menu-item" id="view-profile-btn">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 8C10.2091 8 12 6.20914 12 4C12 1.79086 10.2091 0 8 0C5.79086 0 4 1.79086 4 4C4 6.20914 5.79086 8 8 8Z" fill="currentColor"/>
+              <path d="M8 10C4.68629 10 2 12.6863 2 16H14C14 12.6863 11.3137 10 8 10Z" fill="currentColor"/>
+            </svg>
+            View Profile
+          </a>
+          <button class="profile-menu-item" type="button" id="logout-btn">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 14H3C2.44772 14 2 13.5523 2 13V3C2 2.44772 2.44772 2 3 2H6M10 12L14 8M14 8L10 4M14 8H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="events-page" style="padding: 5rem 2rem;">
+      <div class="section-heading" style="max-width: 800px; margin: 0 auto 3rem;">
+        <div>
+          <p class="eyebrow">About Us</p>
+          <h1>UNI Events</h1>
+          <p>Your premier platform for discovering and managing university events across Sri Lanka</p>
+        </div>
+      </div>
+
+      <div style="max-width: 800px; margin: 0 auto;">
+        <div style="background: rgba(255, 255, 255, 0.05); border-radius: var(--radius-lg); padding: 2.5rem; margin-bottom: 2rem; border: 1px solid rgba(255, 255, 255, 0.1);">
+          <h2 style="margin-top: 0; margin-bottom: 1rem;">Our Mission</h2>
+          <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.8;">
+            UNI Events is dedicated to connecting students across Sri Lankan universities with exciting events, 
+            competitions, workshops, and cultural activities. We aim to create a vibrant community where students 
+            can discover, participate in, and organize events that enrich their university experience.
+          </p>
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.05); border-radius: var(--radius-lg); padding: 2.5rem; margin-bottom: 2rem; border: 1px solid rgba(255, 255, 255, 0.1);">
+          <h2 style="margin-top: 0; margin-bottom: 1rem;">What We Offer</h2>
+          <ul style="color: rgba(255, 255, 255, 0.8); line-height: 2; list-style: none; padding: 0;">
+            <li style="margin-bottom: 1rem; padding-left: 1.5rem; position: relative;">
+              <span style="position: absolute; left: 0; color: var(--color-primary);">✓</span>
+              <strong>Event Discovery:</strong> Browse through a wide range of events from music festivals to coding competitions
+            </li>
+            <li style="margin-bottom: 1rem; padding-left: 1.5rem; position: relative;">
+              <span style="position: absolute; left: 0; color: var(--color-primary);">✓</span>
+              <strong>Easy Registration:</strong> Book events with just a few clicks, with support for both free and paid events
+            </li>
+            <li style="margin-bottom: 1rem; padding-left: 1.5rem; position: relative;">
+              <span style="position: absolute; left: 0; color: var(--color-primary);">✓</span>
+              <strong>Volunteer Opportunities:</strong> Apply to volunteer at events and gain valuable experience
+            </li>
+            <li style="margin-bottom: 1rem; padding-left: 1.5rem; position: relative;">
+              <span style="position: absolute; left: 0; color: var(--color-primary);">✓</span>
+              <strong>Event Requests:</strong> Suggest events you'd like to see organized
+            </li>
+            <li style="margin-bottom: 1rem; padding-left: 1.5rem; position: relative;">
+              <span style="position: absolute; left: 0; color: var(--color-primary);">✓</span>
+              <strong>Secure Platform:</strong> Verified student accounts ensure a safe and trusted environment
+            </li>
+          </ul>
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.05); border-radius: var(--radius-lg); padding: 2.5rem; border: 1px solid rgba(255, 255, 255, 0.1);">
+          <h2 style="margin-top: 0; margin-bottom: 1rem;">Get Involved</h2>
+          <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.8; margin-bottom: 1.5rem;">
+            Whether you're a student looking to attend events, an organizer planning an event, or someone with 
+            event ideas, UNI Events is here for you. Join our community and be part of the vibrant university 
+            event scene in Sri Lanka.
+          </p>
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <a href="events.html" class="btn btn-primary">Browse Events</a>
+            <a href="contact.html" class="btn btn-outline">Contact Us</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer__top">
+      <div>
+        <a class="logo" href="index.html">
+          <img src="assets/images/logo.png" alt="UNI Events logo">
+          <span>UNI Events</span>
+        </a>
+        <p>Eventick is a global self-service ticketing platform for live experiences.</p>
+        <div class="socials">
+          <a href="#" aria-label="Facebook">
+            <img src="assets/images/icon-facebook.svg" alt="" aria-hidden="true">
+          </a>
+          <a href="#" aria-label="Twitter">
+            <img src="assets/images/icon-twitter.svg" alt="" aria-hidden="true">
+          </a>
+          <a href="#" aria-label="LinkedIn">
+            <img src="assets/images/icon-linkedin.svg" alt="" aria-hidden="true">
+          </a>
+        </div>
+      </div>
+      <div>
+        <h3>Marketplace</h3>
+        <ul>
+          <li><a href="events.html">Browse Events</a></li>
+          <li><a href="index.html#upcoming">Upcoming Events</a></li>
+          <li><a href="blog.html">Blog</a></li>
+          <li><a href="about.html">About Us</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>My Account</h3>
+        <ul>
+          <li><a href="auth.html">Login</a></li>
+          <li><a href="auth.html">Register</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+          <li><a href="index.html#contact">Help Center</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Stay in the Loop</h3>
+        <p>Join our mailing list for event drops.</p>
+        <button class="btn btn-outline" type="button">Subscribe</button>
+      </div>
+    </div>
+    <div class="site-footer__bottom">
+      <p>© 2025 UNI Events. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/script.js" defer></script>
+</body>
+
+</html>
+
