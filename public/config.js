@@ -30,11 +30,27 @@
     // Check if we're on Netlify
     const hostname = window.location.hostname;
     if (hostname.includes('netlify.app') || hostname.includes('netlify.com')) {
-      // For Netlify, you MUST set API_BASE_URL in Netlify dashboard
-      // Or inject it via a script tag in index.html
+      // For Netlify, check if API_BASE_URL was set in HTML
+      if (typeof window.API_BASE_URL !== 'undefined' && window.API_BASE_URL && !window.API_BASE_URL.includes('your-backend') && !window.API_BASE_URL.includes('your-api')) {
+        return window.API_BASE_URL;
+      }
+      
+      // Try to get from localStorage (user can set it manually in browser console)
+      const manualUrl = localStorage.getItem('MANUAL_API_URL');
+      if (manualUrl) {
+        console.log('📝 Using manually set API URL from localStorage');
+        return manualUrl;
+      }
+      
+      // Show helpful error
       console.error('⚠️ API_BASE_URL not configured for Netlify!');
-      console.error('Please set API_BASE_URL in Netlify environment variables or add it to index.html');
-      return 'https://your-api.railway.app'; // Placeholder - MUST be updated
+      console.error('📋 To fix this:');
+      console.error('   1. Set API_BASE_URL in Netlify dashboard (Site settings > Environment variables)');
+      console.error('   2. OR update the script tag in index.html with your backend URL');
+      console.error('   3. OR run in browser console: localStorage.setItem("MANUAL_API_URL", "https://your-backend-url.com")');
+      console.error('');
+      console.error('Current placeholder:', 'https://your-backend.railway.app');
+      return 'https://your-backend.railway.app'; // Placeholder - MUST be updated
     }
     
     // Local development defaults
