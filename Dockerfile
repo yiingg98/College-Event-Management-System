@@ -1,5 +1,5 @@
 # UNI Events - Dockerfile for containerized deployment
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Set working directory
 WORKDIR /app
@@ -11,7 +11,7 @@ RUN apk add --no-cache libaio libnsl libc6-compat curl
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 
 # Copy application files
 COPY . .
