@@ -40,15 +40,30 @@ const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
 // MIDDLEWARE SETUP
 // ============================================================================
 
-// CORS configuration - Update with your Netlify domain
+// CORS configuration - Allows localhost and all Netlify domains
 app.use(cors({
-  origin: [
-    process.env.FRONTEND_URL || 'http://localhost:5500',
-    process.env.FRONTEND_URL || 'http://localhost:4400',
-    // Add your Netlify domain here:
-    // 'https://your-site.netlify.app',
-    // 'https://your-custom-domain.com'
-  ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Allow localhost for development
+    if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
+      return callback(null, true);
+    }
+    
+    // Allow all Netlify domains
+    if (origin.includes('.netlify.app')) {
+      return callback(null, true);
+    }
+    
+    // Allow custom domain from environment variable
+    if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
+      return callback(null, true);
+    }
+    
+    // Default: allow the request
+    callback(null, true);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
