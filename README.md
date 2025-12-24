@@ -21,7 +21,7 @@ A comprehensive event management platform for universities, featuring user authe
 
 ```
 event management/
-├── public/                 # Frontend files (for Netlify deployment)
+├── public/                 # Frontend files
 │   ├── index.html         # Landing page
 │   ├── events.html        # Events listing page
 │   ├── event-details.html # Event details page
@@ -40,18 +40,19 @@ event management/
 │   └── assets/            # Static assets
 │       └── images/        # Image assets
 │
-├── server/                # Backend server (for separate hosting)
-│   └── server.js          # Express.js backend server
+├── server/                # Backend server
+│   ├── server.js          # Express.js backend server
+│   ├── db.js              # Database connection
+│   ├── db-access.js       # Database access functions
+│   ├── schema.sql         # Database schema
+│   ├── init-database.js   # Database initialization script
+│   └── verify-tables.js   # Database verification script
 │
-├── data/                  # Data files (JSON storage)
-│   ├── users.json         # User data storage
-│   ├── events.json        # Event data storage
-│   ├── admins.json        # Admin credentials
-│   ├── bookings.json      # Booking records
-│   └── uploads/           # User-uploaded files (student IDs)
+├── data/                  # Data storage
+│   └── uploads/           # User-uploaded files (student IDs, event images)
+│       └── events/        # Event images
 │
 ├── package.json           # Dependencies and scripts
-├── netlify.toml           # Netlify configuration
 ├── .gitignore            # Git ignore rules
 ├── README.md             # This file
 └── ADMIN_README.md       # Admin panel documentation
@@ -60,43 +61,73 @@ event management/
 ## Getting Started
 
 ### Prerequisites
-- Node.js (v14 or higher)
-- npm (Node Package Manager)
+- **Node.js** (v14 or higher) - [Download](https://nodejs.org/)
+- **npm** (comes with Node.js)
+- **Oracle Database** (local installation)
+- **Oracle Instant Client** - [Download](https://www.oracle.com/database/technologies/instant-client/downloads.html)
 
-### Installation
+### Installation Steps
 
-1. **Clone or download the project**
+1. **Clone the repository**
+   ```bash
+   git clone <your-repository-url>
+   cd "event management"
+   ```
 
-2. **Install dependencies**
+2. **Install Node.js dependencies**
    ```bash
    npm install
    ```
 
-3. **Start the server**
+3. **Set up Oracle Database**
+   - Install Oracle Database locally (Oracle XE recommended)
+   - Install Oracle Instant Client
+   - Start Oracle services:
+     - `OracleServiceXE`
+     - `OracleOraDB21Home1TNSListener`
+
+4. **Configure environment variables**
+   - Copy `.env.example` to `.env`:
+     ```bash
+     copy .env.example .env
+     ```
+   - Edit `.env` and update with your database credentials:
+     ```
+     DB_USER=unievents
+     DB_PASSWORD=your_password
+     DB_CONNECTION_STRING=localhost:1521/XEPDB1
+     ORACLE_CLIENT_LIB_DIR=C:\oracle\instantclient_21_3
+     ```
+
+5. **Initialize the database**
+   ```bash
+   npm run init-db
+   ```
+
+6. **Verify database setup**
+   ```bash
+   npm run verify-db
+   ```
+
+7. **Start the server**
    ```bash
    npm start
    ```
    The server will run on `http://localhost:4400`
 
-4. **Access the application**
+8. **Access the application**
    - Main site: `http://localhost:4400`
    - Admin panel: `http://localhost:4400/admin.html`
    - Authentication: `http://localhost:4400/auth.html`
 
-## Deployment
+### Default Admin Credentials
+- **Email:** `admin@unievents.lk`
+- **Password:** `admin123`
 
-See `DEPLOY.md` for complete deployment instructions.
+## Requirements
 
-### Quick Deploy Options:
-
-- **Railway** - Recommended for full-stack deployment
-- **Render** - Easy Node.js hosting
-- **Heroku** - Traditional PaaS
-- **VPS** - Full control (DigitalOcean, AWS EC2, etc.)
-
-The application requires:
-- Node.js runtime
-- Oracle Database (local or cloud)
+- Node.js (v14 or higher)
+- Oracle Database (local installation)
 - Oracle Instant Client
 
 ### Development Mode
@@ -131,20 +162,19 @@ npm run dev
 - **Email:** `admin@unievents.lk`
 - **Password:** `admin123`
 
-⚠️ **Important:** Change the default password in production!
+⚠️ **Important:** Change the default password for security!
 
 See `ADMIN_README.md` for detailed admin panel documentation.
 
 ## File Structure & Organization
 
-### Backend (`server.js`)
-- **Configuration** - Port, file paths, middleware setup
-- **File Upload** - Multer configuration for student ID uploads
-- **Data Access** - Functions for reading/writing JSON files
-- **User Authentication Routes** - Registration, login, user data
-- **Events Routes** - Event listing, details, booking
-- **Admin Routes** - Admin auth, user management, event management
-- **Static File Serving** - HTML pages and static assets
+### Backend (`server/`)
+- **server.js** - Express.js server, routes, and middleware
+- **db.js** - Oracle database connection and pool management
+- **db-access.js** - Database query functions
+- **schema.sql** - Database table definitions
+- **init-database.js** - Database initialization script
+- **verify-tables.js** - Database verification utility
 
 ### Frontend Scripts
 All frontend scripts follow a consistent structure:
@@ -179,20 +209,33 @@ The application uses Oracle Database for data storage:
 - `event_requests` table - User-submitted event requests
 - `contact_requests` table - Contact form submissions
 - `reviews` table - User reviews and testimonials
-- `data/uploads/events/` - Event image uploads
+- `data/uploads/events/` - Event image files (stored on disk)
 
-## Database Setup
+## Troubleshooting
 
-1. **Install Oracle Database** (or use Oracle Cloud Free Tier)
-2. **Configure `.env`** file with database credentials
-3. **Initialize database:**
-   ```bash
-   npm run init-db
-   ```
-4. **Verify setup:**
-   ```bash
-   npm run verify-db
-   ```
+### Oracle Database Connection Issues
+
+**Error: "ORA-12541: TNS:no listener"**
+- Make sure Oracle services are running:
+  - Open Services (`services.msc` on Windows)
+  - Start `OracleServiceXE`
+  - Start `OracleOraDB21Home1TNSListener`
+
+**Error: "Cannot locate Oracle Client library"**
+- Verify Oracle Instant Client is installed
+- Check `ORACLE_CLIENT_LIB_DIR` in `.env` points to correct path
+- Ensure the path contains `oci.dll` (Windows)
+
+**Error: "Invalid username/password"**
+- Verify database credentials in `.env`
+- Check if user exists in Oracle database
+- Default credentials: `unievents` / `password`
+
+### Port Already in Use
+
+If port 4400 is already in use:
+- Change `PORT` in `.env` file
+- Or stop the application using port 4400
 
 ## Features in Detail
 
@@ -221,16 +264,13 @@ The application uses Oracle Database for data storage:
 
 ## Security Notes
 
-⚠️ **This is a prototype/demo application. For production:**
+⚠️ **This is a local development application. Security considerations:**
 
-1. Implement proper session management
-2. Add rate limiting for API endpoints
-3. Use environment variables for sensitive data
-4. Implement proper authorization middleware
-5. Add input validation and sanitization
-6. Use HTTPS in production
-7. Implement CSRF protection
-8. Add proper error handling and logging
+1. Change default admin password
+2. Use environment variables for database credentials
+3. Keep Oracle database secure and accessible only locally
+4. Implement proper input validation
+5. Add proper error handling and logging
 
 ## License
 

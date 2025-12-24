@@ -128,7 +128,6 @@ const resolveApiBase = () => {
   
   // If hosted on Netlify
   if (hostname.includes('netlify.app') || hostname.includes('netlify.com')) {
-    console.warn('⚠️ API_BASE_URL not set for Netlify. Please set it in Netlify environment variables');
     return 'https://your-backend.railway.app'; // Placeholder - MUST be updated
   }
   

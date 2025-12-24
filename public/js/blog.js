@@ -132,7 +132,6 @@ async function loadPastEvents() {
     filteredEvents = [...allPastEvents];
     renderEvents();
     
-    console.log(`Loaded ${allPastEvents.length} past events`);
   } catch (error) {
     console.error('Error loading past events:', error);
     allPastEvents = [];

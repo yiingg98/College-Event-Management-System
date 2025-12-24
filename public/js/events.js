@@ -78,7 +78,6 @@ async function loadEvents() {
     
     allEvents = data;
     filteredEvents = data;
-    console.log(`Loaded ${allEvents.length} events`);
     renderEvents();
   } catch (error) {
     console.error('Error loading events:', error);

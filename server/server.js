@@ -20,8 +20,6 @@ const cors = require('cors');
 const multer = require('multer');
 require('dotenv').config(); // Load environment variables
 
-// Log multer import
-console.log('[SERVER] Multer imported:', typeof multer);
 
 // Database imports
 const { initializePool } = require('./db');
@@ -40,57 +38,20 @@ const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
 // MIDDLEWARE SETUP
 // ============================================================================
 
-// CORS configuration - Allows localhost and all Netlify domains
+// CORS configuration - Local development only
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    // Allow localhost for development
-    if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
-      return callback(null, true);
-    }
-    
-    // Allow all Netlify domains
-    if (origin.includes('.netlify.app')) {
-      return callback(null, true);
-    }
-    
-    // Allow custom domain from environment variable
-    if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
-      return callback(null, true);
-    }
-    
-    // Default: allow the request
-    callback(null, true);
-  },
+  origin: ['http://localhost:5500', 'http://localhost:4400', 'http://127.0.0.1:5500', 'http://127.0.0.1:4400'],
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Log all incoming requests for debugging
-app.use((req, res, next) => {
-  console.log(`[REQUEST] ${req.method} ${req.path} at ${new Date().toISOString()}`);
-  if (req.path.includes('approve')) {
-    console.log('[REQUEST] Approve endpoint hit!', {
-      method: req.method,
-      path: req.path,
-      hasBody: !!req.body,
-      bodyKeys: req.body ? Object.keys(req.body) : [],
-      hasFile: !!req.file,
-      contentType: req.get('content-type')
-    });
-  }
-  next();
-});
 
 // CRITICAL: Only parse JSON for non-multipart requests
 // express.json() consumes the request stream, which prevents multer from reading multipart data
 app.use((req, res, next) => {
   const contentType = req.get('content-type') || '';
   if (contentType.includes('multipart/form-data')) {
-    console.log('[MIDDLEWARE] Skipping JSON parser for multipart request');
     return next(); // Skip JSON parsing for multipart
   }
   express.json()(req, res, next);
@@ -119,19 +80,16 @@ const diskStorage = multer.diskStorage({
   destination: async (req, file, cb) => {
     try {
       const uploadPath = path.join(UPLOADS_DIR, 'events');
-      console.log('[MULTER] Creating upload directory:', uploadPath);
       await fs.mkdir(uploadPath, { recursive: true });
-      console.log('[MULTER] Upload directory ready');
       cb(null, uploadPath);
     } catch (err) {
-      console.error('[MULTER] Error creating upload directory:', err);
+      console.error('Error creating upload directory:', err);
       cb(err);
     }
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const filename = uniqueSuffix + path.extname(file.originalname);
-    console.log('[MULTER] Generated filename:', filename);
     cb(null, filename);
   }
 });
@@ -167,20 +125,13 @@ const uploadEventImage = multer({
     files: 1 // Max number of files
   },
   fileFilter: (req, file, cb) => {
-    console.log('[MULTER] File filter called:', {
-      fieldname: file.fieldname,
-      originalname: file.originalname,
-      mimetype: file.mimetype
-    });
     const allowedTypes = /jpeg|jpg|png/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
     
     if (mimetype && extname) {
-      console.log('[MULTER] File accepted');
       return cb(null, true);
     } else {
-      console.log('[MULTER] File rejected:', { extname, mimetype });
       cb(new Error('Only image files (JPEG, PNG) are allowed'));
     }
   }
@@ -235,27 +186,6 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Test endpoint to verify server is receiving requests
-app.post('/api/test', (req, res) => {
-  console.log('[TEST] Test endpoint hit!', req.body);
-  res.json({ message: 'Server is responding!', received: req.body });
-});
-
-// Simple test endpoint for file upload (without database)
-app.post('/api/test-upload', uploadEventImage.single('image'), (req, res) => {
-  console.log('[TEST-UPLOAD] Test upload endpoint hit!');
-  console.log('[TEST-UPLOAD] Has file:', !!req.file);
-  console.log('[TEST-UPLOAD] File:', req.file ? {
-    originalname: req.file.originalname,
-    filename: req.file.filename,
-    size: req.file.size
-  } : 'No file');
-  res.json({ 
-    message: 'Upload test successful!', 
-    hasFile: !!req.file,
-    file: req.file ? { name: req.file.originalname, size: req.file.size } : null
-  });
-});
 
 // ============================================================================
 // REVIEWS ROUTES
@@ -385,21 +315,7 @@ app.post('/api/register', upload.single('studentIdFile'), async (req, res) => {
       createdAt: new Date()
     };
 
-    console.log('[REGISTER] Creating user with file:', {
-      userId: newUser.id,
-      fileName: newUser.studentIdFileName,
-      mimeType: newUser.studentIdFileMimeType,
-      fileSize: req.file.buffer.length,
-      hasBuffer: !!req.file.buffer
-    });
-
     const createdUser = await createUser(newUser);
-    
-    console.log('[REGISTER] User created:', {
-      userId: createdUser.id || createdUser.ID,
-      hasFileName: !!(createdUser.studentIdFileName || createdUser.STUDENT_ID_FILE_NAME),
-      fileName: createdUser.studentIdFileName || createdUser.STUDENT_ID_FILE_NAME
-    });
     
     res.status(201).json({ 
       message: 'Registration successful! Your account is pending admin verification. You can log in once verified.' 
@@ -455,29 +371,13 @@ app.post('/api/login', async (req, res) => {
 // Get student ID file for a user - MUST come before /api/user/:id
 app.get('/api/user/:id/student-id', async (req, res) => {
   const userId = req.params.id;
-  console.log('[ENDPOINT] GET /api/user/:id/student-id called for user:', userId);
   
   try {
     const fileData = await getStudentIdFile(userId);
     
-    console.log('[ENDPOINT] getStudentIdFile returned:', {
-      hasData: !!fileData,
-      hasBuffer: !!(fileData && fileData.buffer),
-      bufferLength: fileData && fileData.buffer ? fileData.buffer.length : 0,
-      filename: fileData ? fileData.filename : null,
-      mimeType: fileData ? fileData.mimeType : null
-    });
-    
     if (!fileData) {
-      console.log('[ENDPOINT] No file data, returning 404');
       return res.status(404).json({ error: 'Not found' });
     }
-    
-    console.log('[ENDPOINT] Sending file:', {
-      filename: fileData.filename,
-      mimeType: fileData.mimeType,
-      bufferLength: fileData.buffer.length
-    });
     
     res.setHeader('Content-Type', fileData.mimeType);
     res.setHeader('Content-Disposition', `inline; filename="${fileData.filename}"`);
@@ -492,17 +392,13 @@ app.get('/api/user/:id/student-id', async (req, res) => {
 // Using exact path match to ensure it's matched before the parameterized route
 app.get('/api/user/event-requests', async (req, res) => {
   try {
-    console.log('[EVENT-REQUESTS] Endpoint hit with query:', req.query);
     const { userId, email } = req.query;
     
     if (!userId && !email) {
-      console.log('[EVENT-REQUESTS] Missing userId and email');
       return res.status(400).json({ error: 'User ID or email is required' });
     }
 
-    console.log('[EVENT-REQUESTS] Fetching requests for userId:', userId, 'email:', email);
     const userRequests = await getEventRequestsByUser(userId, email);
-    console.log('[EVENT-REQUESTS] Found requests:', userRequests.length);
 
     res.json(userRequests);
   } catch (error) {
@@ -788,21 +684,8 @@ app.get('/api/admin/users/:id', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
     
-    // Debug: Log what we got from database
-    console.log('[ADMIN] User data from DB:', {
-      id: user.id || user.ID,
-      hasFileName: !!(user.studentIdFileName || user.STUDENT_ID_FILE_NAME),
-      fileName: user.studentIdFileName || user.STUDENT_ID_FILE_NAME,
-      hasMimeType: !!(user.studentIdFileMimeType || user.STUDENT_ID_FILE_MIME_TYPE),
-      mimeType: user.studentIdFileMimeType || user.STUDENT_ID_FILE_MIME_TYPE,
-      hasBlob: !!(user.studentIdFile || user.STUDENT_ID_FILE)
-    });
-    
-    // Check if file exists - need both filename AND BLOB to be valid
+    // Check if file exists
     const hasFileName = !!(user.studentIdFileName || user.STUDENT_ID_FILE_NAME);
-    const hasBlob = !!(user.studentIdFile || user.STUDENT_ID_FILE);
-    // Only return true if we have both filename and BLOB (or at least filename if BLOB check isn't reliable)
-    // For now, check if filename exists - if BLOB is null, the endpoint will return 404 which is fine
     const hasStudentIdFile = hasFileName;
     
     // Remove password (handle Oracle column names)
@@ -816,13 +699,6 @@ app.get('/api/admin/users/:id', async (req, res) => {
       hasStudentIdFile: hasStudentIdFile,
       createdAt: user.createdAt || user.CREATED_AT
     };
-    
-    console.log('[ADMIN] Safe user data:', {
-      id: safeUser.id,
-      hasStudentIdFile: safeUser.hasStudentIdFile,
-      fileName: safeUser.studentIdFileName,
-      mimeType: safeUser.studentIdFileMimeType
-    });
     res.json(safeUser);
   } catch (error) {
     console.error('Get user error:', error);
@@ -1041,7 +917,7 @@ const handleMulterError = (err, req, res, next) => {
     console.error('[MULTER] Multer error:', err);
     return res.status(400).json({ error: `File upload error: ${err.message}` });
   } else if (err) {
-    console.error('[MULTER] Upload error:', err);
+    console.error('Upload error:', err);
     return res.status(400).json({ error: err.message || 'File upload failed' });
   }
   next();
@@ -1052,7 +928,7 @@ const timeout = (ms) => {
   return (req, res, next) => {
     const timer = setTimeout(() => {
       if (!res.headersSent) {
-        console.error('[TIMEOUT] Request timed out after', ms, 'ms');
+        console.error('Request timed out after', ms, 'ms');
         res.status(504).json({ error: 'Request timeout' });
       }
     }, ms);
@@ -1062,93 +938,23 @@ const timeout = (ms) => {
   };
 };
 
-// Add logging before multer middleware
 app.post('/api/admin/event-requests/:id/approve', 
-  timeout(30000), // 30 second timeout
-  (req, res, next) => {
-    console.log('[APPROVE] ========== BEFORE MULTER ==========');
-    console.log('[APPROVE] Request received at:', new Date().toISOString());
-    console.log('[APPROVE] Request method:', req.method);
-    console.log('[APPROVE] Request path:', req.path);
-    console.log('[APPROVE] Request params:', req.params);
-    console.log('[APPROVE] Content-Type:', req.get('content-type'));
-    console.log('[APPROVE] Content-Length:', req.get('content-length'));
-    next();
-  }, 
-  (req, res, next) => {
-    console.log('[APPROVE] About to call multer...');
-    console.log('[APPROVE] Request stream info:', {
-      readable: req.readable,
-      readableLength: req.readableLength,
-      readableHighWaterMark: req.readableHighWaterMark
-    });
-    
-    const multerStart = Date.now();
-    const multerMiddleware = uploadEventImage.single('image');
-    
-    multerMiddleware(req, res, (err) => {
-      const multerTime = Date.now() - multerStart;
-      console.log('[APPROVE] Multer completed in', multerTime, 'ms');
-      
-      if (err) {
-        console.error('[APPROVE] Multer error:', err);
-        console.error('[APPROVE] Error type:', err.constructor.name);
-        console.error('[APPROVE] Error message:', err.message);
-        console.error('[APPROVE] Error stack:', err.stack);
-        return next(err);
-      }
-      
-      console.log('[APPROVE] ========== AFTER MULTER ==========');
-      console.log('[APPROVE] Has file:', !!req.file);
-      console.log('[APPROVE] File details:', req.file ? {
-        originalname: req.file.originalname,
-        filename: req.file.filename,
-        size: req.file.size,
-        mimetype: req.file.mimetype,
-        path: req.file.path,
-        destination: req.file.destination
-      } : 'No file');
-      console.log('[APPROVE] Request body keys:', Object.keys(req.body));
-      console.log('[APPROVE] Request body:', req.body);
-      next();
-    });
-  }, 
+  timeout(30000),
+  uploadEventImage.single('image'),
   handleMulterError, 
   async (req, res) => {
-  const startTime = Date.now();
-  
-  // Log immediately when route handler is hit
-  console.log('[APPROVE] ========== ROUTE HANDLER ==========');
-  
   try {
-    console.log('[APPROVE] ========== START ==========');
-    console.log('[APPROVE] Request received:', {
-      requestId: req.params.id,
-      hasFile: !!req.file,
-      fileName: req.file?.originalname,
-      fileSize: req.file?.size,
-      body: req.body
-    });
-    
     const { price, isFree, capacity, tags } = req.body;
     const imageFile = req.file;
     
     if (!imageFile) {
-      console.log('[APPROVE] ❌ No image file provided');
       return res.status(400).json({ error: 'Event image is required' });
     }
     
-    console.log('[APPROVE] Step 1: Fetching event request...');
     const request = await getEventRequestById(req.params.id);
     if (!request) {
-      console.log('[APPROVE] ❌ Event request not found:', req.params.id);
       return res.status(404).json({ error: 'Event request not found' });
     }
-    
-    console.log('[APPROVE] ✅ Event request found:', {
-      id: request.id || request.ID,
-      title: request.title || request.TITLE
-    });
     
     // Parse date to extract month, day, year
     const requestDate = request.requestDate || request.REQUEST_DATE || request.date;
@@ -1183,37 +989,19 @@ app.post('/api/admin/event-requests/:id/approve',
       status: 'upcoming',
       createdAt: new Date()
     };
-
-    console.log('[APPROVE] Step 2: Creating event...', {
-      title: newEvent.title,
-      isFree: newEvent.isFree,
-      price: newEvent.price,
-      capacity: newEvent.capacity
-    });
     
-    const createEventStart = Date.now();
     const createdEvent = await createEvent(newEvent);
-    console.log('[APPROVE] ✅ Event created in', Date.now() - createEventStart, 'ms:', createdEvent?.id || createdEvent?.ID);
 
     // Update request status
-    console.log('[APPROVE] Step 3: Updating request status...');
-    const updateStart = Date.now();
     await updateEventRequest(req.params.id, {
       status: 'approved',
       approvedAt: new Date(),
       eventId: newEvent.id
     });
-    console.log('[APPROVE] ✅ Request updated in', Date.now() - updateStart, 'ms');
-    
-    const totalTime = Date.now() - startTime;
-    console.log('[APPROVE] ========== SUCCESS ========== Total time:', totalTime, 'ms');
     
     res.json({ message: 'Event request approved and event created', event: createdEvent });
   } catch (error) {
-    const totalTime = Date.now() - startTime;
-    console.error('[APPROVE] ========== ERROR ========== Total time:', totalTime, 'ms');
-    console.error('[APPROVE] Error details:', error);
-    console.error('[APPROVE] Error stack:', error.stack);
+    console.error('Error approving event request:', error);
     
     // Make sure we always send a response
     if (!res.headersSent) {

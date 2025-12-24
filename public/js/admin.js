@@ -30,7 +30,6 @@ const resolveApiBase = () => {
   
   // If hosted on Netlify
   if (hostname.includes('netlify.app') || hostname.includes('netlify.com')) {
-    console.warn('⚠️ API_BASE_URL not set for Netlify. Please set it in Netlify environment variables');
     return 'https://your-backend.railway.app'; // Placeholder - MUST be updated
   }
   
@@ -50,7 +49,6 @@ const resolveApiBase = () => {
 };
 
 const API_BASE = resolveApiBase();
-console.log('API Base URL:', API_BASE);
 
 // ============================================================================
 // ADMIN AUTHENTICATION
@@ -58,25 +56,59 @@ console.log('API Base URL:', API_BASE);
 
 /**
  * Checks if admin is logged in and updates UI accordingly
+ * @param {boolean} skipAutoLogin - If true, always show login form (for initial page load)
  * @returns {boolean} True if admin is logged in, false otherwise
  */
-function checkAdminAuth() {
+function checkAdminAuth(skipAutoLogin = false) {
+  const adminHeaderActions = document.getElementById('admin-header-actions');
+  
+  // On initial page load, always show login form
+  if (skipAutoLogin) {
+    document.getElementById('admin-dashboard').style.display = 'none';
+    document.getElementById('admin-login').style.display = 'block';
+    // Hide header actions (Admin name and Logout button) on login page
+    if (adminHeaderActions) {
+      adminHeaderActions.style.display = 'none';
+    }
+    return false;
+  }
+  
   const adminData = localStorage.getItem('admin');
   const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
+  const loginTimestamp = localStorage.getItem('adminLoginTimestamp');
   
-  if (isAdminLoggedIn && adminData) {
+  // Check if session is still valid (within last 8 hours)
+  const SESSION_DURATION = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
+  const now = Date.now();
+  const sessionValid = loginTimestamp && (now - parseInt(loginTimestamp)) < SESSION_DURATION;
+  
+  if (isAdminLoggedIn && adminData && sessionValid) {
     const admin = JSON.parse(adminData);
     document.getElementById('admin-name').textContent = admin.name;
     document.getElementById('admin-dashboard').style.display = 'block';
     document.getElementById('admin-login').style.display = 'none';
+    // Show header actions when logged in
+    if (adminHeaderActions) {
+      adminHeaderActions.style.display = 'flex';
+    }
     loadUsers();
     loadEvents();
     loadEventRequests();
     loadContactRequests();
     return true;
   } else {
+    // Clear invalid or expired session
+    if (!sessionValid) {
+      localStorage.removeItem('admin');
+      localStorage.removeItem('isAdminLoggedIn');
+      localStorage.removeItem('adminLoginTimestamp');
+    }
     document.getElementById('admin-dashboard').style.display = 'none';
     document.getElementById('admin-login').style.display = 'block';
+    // Hide header actions on login page
+    if (adminHeaderActions) {
+      adminHeaderActions.style.display = 'none';
+    }
     return false;
   }
 }
@@ -117,12 +149,13 @@ document.getElementById('admin-login-form')?.addEventListener('submit', async (e
 
     localStorage.setItem('admin', JSON.stringify(result.admin));
     localStorage.setItem('isAdminLoggedIn', 'true');
+    localStorage.setItem('adminLoginTimestamp', Date.now().toString());
     
     alert.textContent = 'Login successful!';
     alert.dataset.state = 'success';
     
     setTimeout(() => {
-      checkAdminAuth();
+      checkAdminAuth(); // This will show the header actions and dashboard
     }, 500);
   } catch (error) {
     alert.textContent = error.message;
@@ -274,18 +307,8 @@ async function viewUser(userId) {
     
     const user = await response.json();
     
-    // Debug: Log user data
-    console.log('[ADMIN FRONTEND] User data received:', {
-      id: user.id,
-      hasStudentIdFile: user.hasStudentIdFile,
-      studentIdFileName: user.studentIdFileName,
-      studentIdFileMimeType: user.studentIdFileMimeType,
-      fullUser: user
-    });
-    
-    // Check if file exists - be more explicit
+    // Check if file exists
     const hasFile = !!(user.hasStudentIdFile || user.studentIdFileName);
-    console.log('[ADMIN FRONTEND] hasFile check:', hasFile, 'hasStudentIdFile:', user.hasStudentIdFile, 'fileName:', user.studentIdFileName);
     
     const modalBody = document.getElementById('user-modal-body');
     modalBody.innerHTML = `
@@ -643,6 +666,7 @@ document.getElementById('user-modal')?.addEventListener('click', (e) => {
 document.getElementById('logout-admin-btn')?.addEventListener('click', () => {
   localStorage.removeItem('admin');
   localStorage.removeItem('isAdminLoggedIn');
+  localStorage.removeItem('adminLoginTimestamp');
   checkAdminAuth();
 });
 
@@ -687,19 +711,6 @@ async function loadContactRequests() {
     
     const requests = await response.json();
     
-    // Debug: Log what we received
-    console.log('[ADMIN] loadContactRequests: Received', requests.length, 'requests');
-    if (requests.length > 0) {
-      const firstRequest = requests[0];
-      console.log('[ADMIN] loadContactRequests: First request:', {
-        id: firstRequest.id || firstRequest.ID,
-        name: firstRequest.name || firstRequest.NAME,
-        email: firstRequest.email || firstRequest.EMAIL,
-        messageType: typeof (firstRequest.message || firstRequest.MESSAGE),
-        messageValue: firstRequest.message || firstRequest.MESSAGE,
-        messagePreview: (firstRequest.message || firstRequest.MESSAGE || '').toString().substring(0, 50)
-      });
-    }
     
     renderContactRequests(requests);
     return requests;
@@ -1121,7 +1132,6 @@ function openApproveModal(requestId) {
     
     newInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
-      console.log('Image selected:', file ? { name: file.name, size: file.size, type: file.type } : 'none');
       
       if (file) {
         // Validate file size (5MB)
@@ -1185,7 +1195,6 @@ async function approveEventRequest(requestId) {
   
   // Prevent duplicate submissions
   if (isApproving) {
-    console.log('Approval already in progress, ignoring duplicate request');
     return;
   }
   
@@ -1211,17 +1220,6 @@ async function approveEventRequest(requestId) {
     const imageInput = document.getElementById('event-image');
     const imageFile = imageInput?.files?.[0];
     
-    console.log('Approval request:', {
-      requestId,
-      hasImageInput: !!imageInput,
-      hasFiles: !!imageInput?.files,
-      fileCount: imageInput?.files?.length || 0,
-      fileName: imageFile?.name,
-      fileSize: imageFile?.size,
-      isFree,
-      price,
-      capacity
-    });
     
     if (!imageFile) {
       throw new Error('Please upload an event image');
@@ -1257,14 +1255,10 @@ async function approveEventRequest(requestId) {
     uploadData.append('tags', tags);
     uploadData.append('image', imageFile);
 
-    console.log('Sending approval request to:', `${API_BASE}/api/admin/event-requests/${requestId}/approve`);
-    
     const response = await fetch(`${API_BASE}/api/admin/event-requests/${requestId}/approve`, {
       method: 'POST',
       body: uploadData
     });
-
-    console.log('Response status:', response.status, response.statusText);
 
     if (!response.ok) {
       let errorData;
@@ -1279,7 +1273,6 @@ async function approveEventRequest(requestId) {
     }
 
     const result = await response.json();
-    console.log('Approval successful:', result);
     
     if (alert) {
       alert.textContent = '✅ Event approved and created successfully!';
@@ -1515,10 +1508,8 @@ window.closeAddEventModal = closeAddEventModal;
 
 // Initialize admin panel when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  checkAdminAuth();
-  if (checkAdminAuth()) {
-    loadEventRequests();
-  }
+  // On initial page load, always show login form (skip auto-login)
+  checkAdminAuth(true);
   
   // Approval modal event listeners
   const approveModal = document.getElementById('approve-event-modal');
@@ -1568,7 +1559,6 @@ document.addEventListener('DOMContentLoaded', () => {
       e.stopPropagation();
       
       const requestId = formToUse.dataset.requestId;
-      console.log('Form submitted, requestId:', requestId);
       
       if (requestId) {
         await approveEventRequest(requestId);

@@ -42,7 +42,6 @@ if (typeof resolveApiBase === 'undefined') {
     // If hosted on Netlify (netlify.app or netlify.com domain)
     if (hostname.includes('netlify.app') || hostname.includes('netlify.com')) {
       // This should be set via config.js or Netlify environment variable
-      console.warn('⚠️ API_BASE_URL not set for Netlify. Please set it in Netlify environment variables or update config.js');
       return 'https://your-backend.railway.app'; // Placeholder - MUST be updated
     }
     
@@ -90,13 +89,6 @@ const initializeApp = async () => {
   initializeFooterSubscribe();
   initializeReviews();
   
-  // Debug: Log initialization
-  console.log('✅ Homepage initialized:', {
-    quickCards: document.querySelectorAll('.quick-card').length,
-    searchFilters: !!document.getElementById('date-filter-select'),
-    reviews: !!document.querySelector('.review-card--ghost button'),
-    footerSubscribe: !!document.querySelector('.site-footer button[type="button"]')
-  });
 };
 
 // ============================================================================
@@ -219,7 +211,6 @@ async function loadEventsFromServer() {
       };
     });
     
-    console.log(`Loaded ${upcomingEvents.length} events from server`);
   } catch (error) {
     console.error('Error loading events:', error);
     upcomingEvents = [];
@@ -1421,7 +1412,6 @@ function initializeHomepageSearch() {
  */
 function initializeQuickCards() {
   const quickCards = document.querySelectorAll('.quick-card');
-  console.log('Initializing quick cards:', quickCards.length);
   
   if (quickCards.length === 0) {
     console.warn('No quick cards found');
@@ -1486,7 +1476,6 @@ function initializeQuickCards() {
     });
   });
   
-  console.log('✅ Quick cards initialized');
 }
 
 /**
@@ -1497,8 +1486,6 @@ function initializeFooterSubscribe() {
   const subscribeForm = document.getElementById('subscribe-form');
   const subscribeInput = subscribeForm?.querySelector('input[type="email"]');
   
-  console.log('Initializing footer subscribe:', {
-    button: !!footerSubscribeBtn,
     form: !!subscribeForm,
     input: !!subscribeInput
   });
@@ -1525,7 +1512,6 @@ function initializeFooterSubscribe() {
         }, 500);
       }
     });
-    console.log('✅ Footer subscribe button initialized');
   } else {
     console.warn('Footer subscribe button not found');
   }
@@ -1535,7 +1521,6 @@ function initializeFooterSubscribe() {
  * Initializes reviews section functionality
  */
 function initializeReviews() {
-  console.log('Initializing reviews section');
   
   // Load reviews from server
   loadReviews();
@@ -1553,7 +1538,6 @@ function initializeReviews() {
       console.log('Add review button clicked');
       openReviewModal();
     });
-    console.log('✅ Add review button initialized');
   } else {
     console.warn('Add review button not found');
   }
@@ -1570,7 +1554,6 @@ function initializeReviews() {
         contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     });
-    console.log('✅ See All reviews link initialized');
   } else {
     console.warn('See All reviews link not found');
   }
@@ -1637,7 +1620,6 @@ async function loadReviews() {
       }
     });
     
-    console.log('✅ Reviews loaded:', reviews.length);
   } catch (error) {
     console.error('Error loading reviews:', error);
   }
@@ -1872,7 +1854,6 @@ function initializeReviewModal() {
     });
   }
   
-  console.log('✅ Review modal initialized');
 }
 
 // Load past events preview for homepage
@@ -1951,7 +1932,6 @@ if (document.readyState === 'loading') {
     try {
       await initializeApp();
       loadPastEventsPreview();
-      console.log('✅ All homepage features initialized');
     } catch (error) {
       console.error('❌ Error initializing homepage:', error);
     }
@@ -1962,7 +1942,6 @@ if (document.readyState === 'loading') {
     try {
       await initializeApp();
       loadPastEventsPreview();
-      console.log('✅ All homepage features initialized');
     } catch (error) {
       console.error('❌ Error initializing homepage:', error);
     }
