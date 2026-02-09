@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
-  
+
   <!-- API Configuration - Set this in Netlify environment variables -->
   <script>
     window.API_BASE_URL = window.API_BASE_URL || 'https://your-backend.railway.app';
@@ -45,20 +45,24 @@
           </div>
           <span id="profile-name">User</span>
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
           </svg>
         </button>
         <div class="profile-menu" id="profile-menu">
           <a href="profile.html" class="profile-menu-item" id="view-profile-btn">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8 8C10.2091 8 12 6.20914 12 4C12 1.79086 10.2091 0 8 0C5.79086 0 4 1.79086 4 4C4 6.20914 5.79086 8 8 8Z" fill="currentColor"/>
-              <path d="M8 10C4.68629 10 2 12.6863 2 16H14C14 12.6863 11.3137 10 8 10Z" fill="currentColor"/>
+              <path
+                d="M8 8C10.2091 8 12 6.20914 12 4C12 1.79086 10.2091 0 8 0C5.79086 0 4 1.79086 4 4C4 6.20914 5.79086 8 8 8Z"
+                fill="currentColor" />
+              <path d="M8 10C4.68629 10 2 12.6863 2 16H14C14 12.6863 11.3137 10 8 10Z" fill="currentColor" />
             </svg>
             View Profile
           </a>
           <button class="profile-menu-item" type="button" id="logout-btn">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 14H3C2.44772 14 2 13.5523 2 13V3C2 2.44772 2.44772 2 3 2H6M10 12L14 8M14 8L10 4M14 8H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M6 14H3C2.44772 14 2 13.5523 2 13V3C2 2.44772 2.44772 2 3 2H6M10 12L14 8M14 8L10 4M14 8H6"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
             Logout
           </button>
@@ -78,7 +82,8 @@
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 2rem;">
+        <div
+          style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 2rem;">
           <div class="event-details__section">
             <h3>General Inquiries</h3>
             <p>For general questions about events, registration, or platform usage:</p>
@@ -184,7 +189,7 @@
       const form = e.target;
       const alert = document.querySelector('[data-contact-alert]');
       const submitBtn = form.querySelector('button[type="submit"]');
-      
+
       // Get form data
       const formData = new FormData(form);
       const data = {
@@ -193,14 +198,14 @@
         subject: formData.get('subject'),
         message: formData.get('message')
       };
-      
+
       // Show loading state
       submitBtn.disabled = true;
       submitBtn.textContent = 'Sending...';
       alert.textContent = 'Sending your message...';
       alert.dataset.state = 'info';
       alert.style.display = 'block';
-      
+
       try {
         const API_BASE = window.API_BASE || 'http://localhost:4400';
         const response = await fetch(`${API_BASE}/api/contact`, {
@@ -208,13 +213,13 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
-        
+
         const result = await response.json();
-        
+
         if (!response.ok) {
           throw new Error(result.error || 'Failed to send message');
         }
-        
+
         alert.textContent = result.message || 'Thank you for your message! We will get back to you soon.';
         alert.dataset.state = 'success';
         form.reset();
@@ -231,4 +236,3 @@
 </body>
 
 </html>
-

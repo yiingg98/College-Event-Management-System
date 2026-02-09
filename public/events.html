@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
-  
+
   <!-- API Configuration - Set this in Netlify environment variables -->
   <script>
     window.API_BASE_URL = window.API_BASE_URL || 'https://your-backend.railway.app';
@@ -45,20 +45,24 @@
           </div>
           <span id="profile-name">User</span>
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
           </svg>
         </button>
         <div class="profile-menu" id="profile-menu">
           <a href="profile.html" class="profile-menu-item" id="view-profile-btn">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8 8C10.2091 8 12 6.20914 12 4C12 1.79086 10.2091 0 8 0C5.79086 0 4 1.79086 4 4C4 6.20914 5.79086 8 8 8Z" fill="currentColor"/>
-              <path d="M8 10C4.68629 10 2 12.6863 2 16H14C14 12.6863 11.3137 10 8 10Z" fill="currentColor"/>
+              <path
+                d="M8 8C10.2091 8 12 6.20914 12 4C12 1.79086 10.2091 0 8 0C5.79086 0 4 1.79086 4 4C4 6.20914 5.79086 8 8 8Z"
+                fill="currentColor" />
+              <path d="M8 10C4.68629 10 2 12.6863 2 16H14C14 12.6863 11.3137 10 8 10Z" fill="currentColor" />
             </svg>
             View Profile
           </a>
           <button class="profile-menu-item" type="button" id="logout-btn">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 14H3C2.44772 14 2 13.5523 2 13V3C2 2.44772 2.44772 2 3 2H6M10 12L14 8M14 8L10 4M14 8H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M6 14H3C2.44772 14 2 13.5523 2 13V3C2 2.44772 2.44772 2 3 2H6M10 12L14 8M14 8L10 4M14 8H6"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
             Logout
           </button>
@@ -73,11 +77,11 @@
         <div>
           <p class="eyebrow">Discover</p>
           <h1>All Events</h1>
-          <p>Browse through all upcoming events across Sri Lankan universities</p>
+          <p>Browse through all upcoming events across Nepalese universities</p>
         </div>
         <button class="btn btn-primary" id="request-event-btn" type="button">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
           </svg>
           Request Event
         </button>
@@ -170,12 +174,14 @@
     <div class="request-event-modal__content">
       <button class="request-event-modal__close" id="request-event-modal-close" type="button" aria-label="Close modal">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" />
         </svg>
       </button>
       <h2>Request an Event</h2>
-      <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 1.5rem;">Submit an event request for admin review. We'll notify you once it's approved.</p>
-      
+      <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 1.5rem;">Submit an event request for admin review. We'll
+        notify you once it's approved.</p>
+
       <form id="request-event-form" class="auth-form">
         <label class="form-field">
           <span>Event Title *</span>
@@ -211,29 +217,29 @@
             <span>Time *</span>
             <input type="time" name="time" required>
           </label>
-        </label>
-        <label class="form-field">
-          <span>Location *</span>
-          <input type="text" name="location" placeholder="e.g., University of Moratuwa" required>
-        </label>
-        <label class="form-field">
-          <span>Venue</span>
-          <input type="text" name="venue" placeholder="e.g., Main Auditorium">
-        </label>
-        <label class="form-field">
-          <span>Organizer *</span>
-          <input type="text" name="organizer" placeholder="e.g., Engineering Department" required>
-        </label>
-        <label class="form-field">
-          <span>Your Email *</span>
-          <input type="email" name="requesterEmail" placeholder="your@email.com" required>
-        </label>
-        <label class="form-field">
-          <span>Additional Notes</span>
-          <textarea name="notes" placeholder="Any additional information..." rows="3"></textarea>
-        </label>
-        <button class="btn btn-primary" type="submit">Submit Request</button>
-        <p class="form-alert" data-request-alert></p>
+          </label>
+          <label class="form-field">
+            <span>Location *</span>
+            <input type="text" name="location" placeholder="e.g., University of Moratuwa" required>
+          </label>
+          <label class="form-field">
+            <span>Venue</span>
+            <input type="text" name="venue" placeholder="e.g., Main Auditorium">
+          </label>
+          <label class="form-field">
+            <span>Organizer *</span>
+            <input type="text" name="organizer" placeholder="e.g., Engineering Department" required>
+          </label>
+          <label class="form-field">
+            <span>Your Email *</span>
+            <input type="email" name="requesterEmail" placeholder="your@email.com" required>
+          </label>
+          <label class="form-field">
+            <span>Additional Notes</span>
+            <textarea name="notes" placeholder="Any additional information..." rows="3"></textarea>
+          </label>
+          <button class="btn btn-primary" type="submit">Submit Request</button>
+          <p class="form-alert" data-request-alert></p>
       </form>
     </div>
   </div>
@@ -244,7 +250,8 @@
     <div class="booking-modal__content">
       <button class="booking-modal__close" id="booking-modal-close" type="button" aria-label="Close booking">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" />
         </svg>
       </button>
       <h2 id="booking-modal-title">Book Event</h2>
@@ -325,4 +332,3 @@
 </body>
 
 </html>
-

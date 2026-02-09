@@ -4,12 +4,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UNI Events – Sri Lankan University Event Hub</title>
+  <title>UNI Events – University Event Hub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
-  
+
   <!-- API Configuration - Set this in Netlify environment variables -->
   <script>
     // API Base URL - Set via Netlify environment variable API_BASE_URL
@@ -47,20 +47,24 @@
           </div>
           <span id="profile-name">User</span>
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
           </svg>
         </button>
         <div class="profile-menu" id="profile-menu">
           <a href="profile.html" class="profile-menu-item" id="view-profile-btn">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8 8C10.2091 8 12 6.20914 12 4C12 1.79086 10.2091 0 8 0C5.79086 0 4 1.79086 4 4C4 6.20914 5.79086 8 8 8Z" fill="currentColor"/>
-              <path d="M8 10C4.68629 10 2 12.6863 2 16H14C14 12.6863 11.3137 10 8 10Z" fill="currentColor"/>
+              <path
+                d="M8 8C10.2091 8 12 6.20914 12 4C12 1.79086 10.2091 0 8 0C5.79086 0 4 1.79086 4 4C4 6.20914 5.79086 8 8 8Z"
+                fill="currentColor" />
+              <path d="M8 10C4.68629 10 2 12.6863 2 16H14C14 12.6863 11.3137 10 8 10Z" fill="currentColor" />
             </svg>
             View Profile
           </a>
           <button class="profile-menu-item" type="button" id="logout-btn">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 14H3C2.44772 14 2 13.5523 2 13V3C2 2.44772 2.44772 2 3 2H6M10 12L14 8M14 8L10 4M14 8H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M6 14H3C2.44772 14 2 13.5523 2 13V3C2 2.44772 2.44772 2 3 2H6M10 12L14 8M14 8L10 4M14 8H6"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
             Logout
           </button>
@@ -72,12 +76,13 @@
   <main>
     <section class="hero" id="events">
       <div class="hero__background">
-        
+
       </div>
       <div class="hero__grid">
         <div class="hero__copy">
 
-          <h1>Stay updated with the latest academic talks, workshops, and social gatherings across Sri Lankan universities.</h1>
+          <h1>Stay updated with the latest academic talks, workshops, and social gatherings across all Nepalese
+            universities.</h1>
           <p class="lead">
             Whether you're here to network, learn, or have fun, there’s something for everyone!
           </p>
@@ -105,7 +110,8 @@
           </div>
         </div>
         <article class="hero-card" id="hero-event-card">
-          <img class="hero-card__media" id="hero-event-image" src="assets/images/hero-event.png" alt="Featured event" loading="lazy">
+          <img class="hero-card__media" id="hero-event-image" src="assets/images/hero-event.png" alt="Featured event"
+            loading="lazy">
           <div class="hero-card__body">
             <p class="hero-card__title" id="hero-event-title">Loading ongoing event...</p>
             <p class="hero-card__subtitle" id="hero-event-subtitle">-</p>
@@ -152,10 +158,13 @@
       </div>
       <div class="filter-card filter-card--input">
         <p class="filter-card__label">Event:</p>
-        <input type="text" id="event-filter-input" class="filter-card__input" placeholder="Search events..." oninput="updateEventFilter(this.value)" onkeypress="if(event.key==='Enter') performHomepageSearch()">
+        <input type="text" id="event-filter-input" class="filter-card__input" placeholder="Search events..."
+          oninput="updateEventFilter(this.value)" onkeypress="if(event.key==='Enter') performHomepageSearch()">
       </div>
-      <button class="pill pill--ghost" type="button" id="homepage-search-btn" onclick="performHomepageSearch()">Search</button>
-      <button class="pill pill--ghost" type="button" id="homepage-reset-btn" onclick="resetHomepageSearch()" style="display: none; margin-left: 0.5rem;">Reset</button>
+      <button class="pill pill--ghost" type="button" id="homepage-search-btn"
+        onclick="performHomepageSearch()">Search</button>
+      <button class="pill pill--ghost" type="button" id="homepage-reset-btn" onclick="resetHomepageSearch()"
+        style="display: none; margin-left: 0.5rem;">Reset</button>
     </section>
 
     <section class="upcoming" id="upcoming">
@@ -163,7 +172,7 @@
         <div>
           <p class="eyebrow">Events</p>
           <h2>Upcoming Events</h2>
-          <p>Discover curated happenings across Sri Lankan campuses.</p>
+          <p>Discover curated happenings across Nepalese campuses.</p>
         </div>
         <div class="tabs" role="tablist" aria-label="Upcoming event filters">
           <button class="tab" type="button" data-filter="weekdays">Weekdays</button>
@@ -185,7 +194,8 @@
         <a href="blog.html" class="btn btn-outline">View All Past Events</a>
       </div>
       <div class="blog__grid" id="past-events-preview">
-        <div class="loading-state" style="text-align: center; padding: 2rem; color: rgba(255,255,255,0.7);">Loading past events...</div>
+        <div class="loading-state" style="text-align: center; padding: 2rem; color: rgba(255,255,255,0.7);">Loading past
+          events...</div>
       </div>
     </section>
 
@@ -220,7 +230,8 @@
             </div>
             <img src="assets/images/icon-stars.svg" alt="5 star rating">
           </div>
-          <p>Sekarang, kamu bisa produksi tiket fisik untuk eventmu bersama Bostiketbos. Hanya perlu mengikuti beberapa langkah mudah.</p>
+          <p>Sekarang, kamu bisa produksi tiket fisik untuk eventmu bersama Bostiketbos. Hanya perlu mengikuti beberapa
+            langkah mudah.</p>
         </article>
         <article class="review-card">
           <img class="review-card__avatar" src="assets/images/avatar-review.png" alt="Taylor Swifft">
@@ -231,7 +242,8 @@
             </div>
             <img src="assets/images/icon-stars.svg" alt="5 star rating">
           </div>
-          <p>Sekarang, kamu bisa produksi tiket fisik untuk eventmu bersama Bostiketbos. Hanya perlu mengikuti beberapa langkah mudah.</p>
+          <p>Sekarang, kamu bisa produksi tiket fisik untuk eventmu bersama Bostiketbos. Hanya perlu mengikuti beberapa
+            langkah mudah.</p>
         </article>
         <article class="review-card">
           <img class="review-card__avatar" src="assets/images/avatar-review.png" alt="Taylor Swifft">
@@ -242,7 +254,8 @@
             </div>
             <img src="assets/images/icon-stars.svg" alt="5 star rating">
           </div>
-          <p>Sekarang, kamu bisa produksi tiket fisik untuk eventmu bersama Bostiketbos. Hanya perlu mengikuti beberapa langkah mudah.</p>
+          <p>Sekarang, kamu bisa produksi tiket fisik untuk eventmu bersama Bostiketbos. Hanya perlu mengikuti beberapa
+            langkah mudah.</p>
         </article>
         <article class="review-card review-card--ghost">
           <div>
@@ -275,14 +288,18 @@
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
         <h2 style="margin: 0;">Profile</h2>
         <div style="display: flex; gap: 0.5rem; align-items: center;">
-          <button class="btn-icon" id="refresh-profile-btn" type="button" title="Refresh profile data" style="color: rgba(255,255,255,0.7); padding: 0.5rem;">
+          <button class="btn-icon" id="refresh-profile-btn" type="button" title="Refresh profile data"
+            style="color: rgba(255,255,255,0.7); padding: 0.5rem;">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17.5 2.5V7.5H12.5M2.5 17.5V12.5H7.5M15.8333 4.16667C16.8964 5.22973 17.5 6.73027 17.5 8.33333C17.5 11.7217 14.7217 14.5 11.3333 14.5C7.94502 14.5 5.16667 11.7217 5.16667 8.33333C5.16667 4.94502 7.94502 2.16667 11.3333 2.16667C12.9364 2.16667 14.4369 2.77024 15.5 3.83333L17.5 2.5ZM2.5 15.8333C3.56306 14.7702 5.0636 14.1667 6.66667 14.1667C10.055 14.1667 12.8333 11.3883 12.8333 8C12.8333 4.61167 10.055 1.83333 6.66667 1.83333C3.27833 1.83333 0.5 4.61167 0.5 8C0.5 9.60306 1.10357 11.1036 2.16667 12.1667L2.5 15.8333Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path
+                d="M17.5 2.5V7.5H12.5M2.5 17.5V12.5H7.5M15.8333 4.16667C16.8964 5.22973 17.5 6.73027 17.5 8.33333C17.5 11.7217 14.7217 14.5 11.3333 14.5C7.94502 14.5 5.16667 11.7217 5.16667 8.33333C5.16667 4.94502 7.94502 2.16667 11.3333 2.16667C12.9364 2.16667 14.4369 2.77024 15.5 3.83333L17.5 2.5ZM2.5 15.8333C3.56306 14.7702 5.0636 14.1667 6.66667 14.1667C10.055 14.1667 12.8333 11.3883 12.8333 8C12.8333 4.61167 10.055 1.83333 6.66667 1.83333C3.27833 1.83333 0.5 4.61167 0.5 8C0.5 9.60306 1.10357 11.1036 2.16667 12.1667L2.5 15.8333Z"
+                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
           </button>
           <button class="profile-modal__close" id="profile-modal-close" type="button" aria-label="Close profile">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
             </svg>
           </button>
         </div>
@@ -294,13 +311,18 @@
           </div>
           <div class="profile-section__badge" id="verified-badge" style="display: none;">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8 0L9.79769 5.52786L16 6.11114L12 10.2361L12.9443 16L8 13.2361L3.05573 16L4 10.2361L0 6.11114L6.20231 5.52786L8 0Z" fill="currentColor"/>
+              <path
+                d="M8 0L9.79769 5.52786L16 6.11114L12 10.2361L12.9443 16L8 13.2361L3.05573 16L4 10.2361L0 6.11114L6.20231 5.52786L8 0Z"
+                fill="currentColor" />
             </svg>
             <span id="verified-badge-text">Verified</span>
           </div>
-          <div class="profile-section__badge profile-section__badge--unverified" id="unverified-badge" style="display: none;">
+          <div class="profile-section__badge profile-section__badge--unverified" id="unverified-badge"
+            style="display: none;">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8 0C3.58172 0 0 3.58172 0 8C0 12.4183 3.58172 16 8 16C12.4183 16 16 12.4183 16 8C16 3.58172 12.4183 0 8 0ZM8 14C4.68629 14 2 11.3137 2 8C2 4.68629 4.68629 2 8 2C11.3137 2 14 4.68629 14 8C14 11.3137 11.3137 14 8 14Z" fill="currentColor"/>
+              <path
+                d="M8 0C3.58172 0 0 3.58172 0 8C0 12.4183 3.58172 16 8 16C12.4183 16 16 12.4183 16 8C16 3.58172 12.4183 0 8 0ZM8 14C4.68629 14 2 11.3137 2 8C2 4.68629 4.68629 2 8 2C11.3137 2 14 4.68629 14 8C14 11.3137 11.3137 14 8 14Z"
+                fill="currentColor" />
             </svg>
             <span>Pending Verification</span>
           </div>
@@ -379,7 +401,8 @@
     <div class="booking-modal__content">
       <button class="booking-modal__close" id="booking-modal-close" type="button" aria-label="Close booking">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" />
         </svg>
       </button>
       <h2 id="booking-modal-title">Book Event</h2>
@@ -417,7 +440,8 @@
           </div>
           <div class="form-field">
             <label for="reason">Reason for Volunteering *</label>
-            <textarea id="reason" name="reason" rows="4" placeholder="Tell us why you want to volunteer..." required></textarea>
+            <textarea id="reason" name="reason" rows="4" placeholder="Tell us why you want to volunteer..."
+              required></textarea>
           </div>
         </div>
 
@@ -448,8 +472,8 @@
                 <div class="payment-method__card">
                   <div class="payment-logo payment-logo--bank">
                     <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                      <rect width="32" height="32" rx="6" fill="rgba(255,255,255,0.1)"/>
-                      <path d="M16 10L22 14H20V20H12V14H10L16 10Z" fill="currentColor"/>
+                      <rect width="32" height="32" rx="6" fill="rgba(255,255,255,0.1)" />
+                      <path d="M16 10L22 14H20V20H12V14H10L16 10Z" fill="currentColor" />
                     </svg>
                   </div>
                   <span>Bank Transfer</span>
@@ -474,7 +498,8 @@
     <div class="booking-modal__content" style="max-width: 500px;">
       <button class="booking-modal__close" id="review-modal-close" type="button" aria-label="Close review">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" />
         </svg>
       </button>
       <h2>Add Your Review</h2>
@@ -487,17 +512,23 @@
         <div class="form-field">
           <label for="review-rating">Rating *</label>
           <div class="rating-input" style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
-            <button type="button" class="rating-star" data-rating="1" style="background: transparent; border: none; cursor: pointer; font-size: 2rem; color: rgba(255,255,255,0.3);">⭐</button>
-            <button type="button" class="rating-star" data-rating="2" style="background: transparent; border: none; cursor: pointer; font-size: 2rem; color: rgba(255,255,255,0.3);">⭐</button>
-            <button type="button" class="rating-star" data-rating="3" style="background: transparent; border: none; cursor: pointer; font-size: 2rem; color: rgba(255,255,255,0.3);">⭐</button>
-            <button type="button" class="rating-star" data-rating="4" style="background: transparent; border: none; cursor: pointer; font-size: 2rem; color: rgba(255,255,255,0.3);">⭐</button>
-            <button type="button" class="rating-star" data-rating="5" style="background: transparent; border: none; cursor: pointer; font-size: 2rem; color: rgba(255,255,255,0.3);">⭐</button>
+            <button type="button" class="rating-star" data-rating="1"
+              style="background: transparent; border: none; cursor: pointer; font-size: 2rem; color: rgba(255,255,255,0.3);">⭐</button>
+            <button type="button" class="rating-star" data-rating="2"
+              style="background: transparent; border: none; cursor: pointer; font-size: 2rem; color: rgba(255,255,255,0.3);">⭐</button>
+            <button type="button" class="rating-star" data-rating="3"
+              style="background: transparent; border: none; cursor: pointer; font-size: 2rem; color: rgba(255,255,255,0.3);">⭐</button>
+            <button type="button" class="rating-star" data-rating="4"
+              style="background: transparent; border: none; cursor: pointer; font-size: 2rem; color: rgba(255,255,255,0.3);">⭐</button>
+            <button type="button" class="rating-star" data-rating="5"
+              style="background: transparent; border: none; cursor: pointer; font-size: 2rem; color: rgba(255,255,255,0.3);">⭐</button>
           </div>
           <input type="hidden" id="review-rating" name="rating" required>
         </div>
         <div class="form-field">
           <label for="review-comment">Your Review</label>
-          <textarea id="review-comment" name="comment" rows="4" placeholder="Tell us about your experience..."></textarea>
+          <textarea id="review-comment" name="comment" rows="4"
+            placeholder="Tell us about your experience..."></textarea>
         </div>
         <div class="booking-form__actions">
           <button type="button" class="btn btn-outline" id="cancel-review-btn">Cancel</button>
@@ -512,4 +543,3 @@
 </body>
 
 </html>
-
