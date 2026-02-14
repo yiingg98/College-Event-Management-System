@@ -106,7 +106,7 @@ const upload = multer({
     const allowedTypes = /jpeg|jpg|png|pdf/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
-    
+
     if (mimetype && extname) {
       return cb(null, true);
     } else {
@@ -128,7 +128,7 @@ const uploadEventImage = multer({
     const allowedTypes = /jpeg|jpg|png/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
-    
+
     if (mimetype && extname) {
       return cb(null, true);
     } else {
@@ -185,7 +185,33 @@ const updateContactRequest = db.updateContactRequest;
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+app.get('/api/verify-db', async (req, res) => {
+  const { getConnection, oracledb } = require('./db');
+  let connection;
 
+  try {
+    connection = await getConnection();
+
+    const result = await connection.execute(
+      `SELECT email, password FROM admins WHERE ROWNUM = 1`,
+      {},
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    await connection.close();
+
+    res.json({
+      message: '✅ Connected!',
+      admin: result.rows[0],
+      connectionString: process.env.DB_CONNECTION_STRING || 'localhost:1521/XEPDB1',
+      user: process.env.DB_USER || 'unievents'
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message
+    });
+  }
+});
 
 // ============================================================================
 // REVIEWS ROUTES
@@ -207,25 +233,25 @@ app.get('/api/reviews', async (req, res) => {
 app.post('/api/reviews', async (req, res) => {
   try {
     const { rating, comment, userName } = req.body;
-    
+
     if (!rating || !userName) {
       return res.status(400).json({ error: 'Rating and name are required' });
     }
-    
+
     if (rating < 1 || rating > 5) {
       return res.status(400).json({ error: 'Rating must be between 1 and 5' });
     }
-    
+
     // Get user info if logged in
     let userId = null;
     let userEmail = null;
     const userData = req.headers.authorization ? JSON.parse(Buffer.from(req.headers.authorization.split(' ')[1], 'base64').toString()) : null;
-    
+
     if (userData && userData.userId) {
       userId = userData.userId;
       userEmail = userData.email;
     }
-    
+
     const review = {
       id: `review_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       userId: userId,
@@ -236,7 +262,7 @@ app.post('/api/reviews', async (req, res) => {
       status: 'approved', // Auto-approve for now
       createdAt: new Date()
     };
-    
+
     const createdReview = await createReview(review);
     res.status(201).json(createdReview);
   } catch (error) {
@@ -253,11 +279,11 @@ app.post('/api/reviews', async (req, res) => {
 app.post('/api/contact', async (req, res) => {
   try {
     const { name, email, subject, message } = req.body;
-    
+
     if (!name || !email || !message) {
       return res.status(400).json({ error: 'Name, email, and message are required' });
     }
-    
+
     const contactRequest = {
       id: Date.now().toString(),
       name,
@@ -267,9 +293,9 @@ app.post('/api/contact', async (req, res) => {
       status: 'new',
       createdAt: new Date()
     };
-    
+
     const created = await createContactRequest(contactRequest);
-    res.status(201).json({ 
+    res.status(201).json({
       message: 'Thank you for your message! We will get back to you soon.',
       request: created
     });
@@ -287,7 +313,7 @@ app.post('/api/contact', async (req, res) => {
 app.post('/api/register', upload.single('studentIdFile'), async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    
+
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'Name, email, and password are required.' });
     }
@@ -316,20 +342,20 @@ app.post('/api/register', upload.single('studentIdFile'), async (req, res) => {
     };
 
     const createdUser = await createUser(newUser);
-    
-    res.status(201).json({ 
-      message: 'Registration successful! Your account is pending admin verification. You can log in once verified.' 
+
+    res.status(201).json({
+      message: 'Registration successful! Your account is pending admin verification. You can log in once verified.'
     });
   } catch (error) {
     console.error('Register error:', error);
-    
+
     if (error.message.includes('file size')) {
       return res.status(400).json({ error: 'File size exceeds 5MB limit.' });
     }
     if (error.message.includes('Only image')) {
       return res.status(400).json({ error: 'Only image files (JPEG, PNG) and PDF files are allowed.' });
     }
-    
+
     res.status(500).json({ error: 'Something went wrong. Please try again later.' });
   }
 });
@@ -338,16 +364,31 @@ app.post('/api/register', upload.single('studentIdFile'), async (req, res) => {
 app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    console.log('User login attempt - Email:', email, 'Password:', password);
+
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required.' });
     }
 
     const user = await getUserByEmail(email);
+
+    console.log('User from DB:', user);
+
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials.' });
     }
 
-    const isValid = await bcrypt.compare(password, user.password);
+    // Handle Oracle's uppercase column names
+    const userPassword = user.PASSWORD || user.password;
+
+    console.log('User password from DB:', userPassword);
+
+    // Use bcrypt to compare
+    const isValid = await bcrypt.compare(password, userPassword);
+
+    console.log('Password match:', isValid);
+
     if (!isValid) {
       return res.status(401).json({ error: 'Invalid credentials.' });
     }
@@ -355,11 +396,11 @@ app.post('/api/login', async (req, res) => {
     res.json({
       message: 'Login successful.',
       user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
+        id: user.ID || user.id,
+        name: user.NAME || user.name,
+        email: user.EMAIL || user.email,
         verified: user.VERIFIED === 1 || user.verified === 1 || user.verified === true,
-        createdAt: user.createdAt
+        createdAt: user.CREATED_AT || user.createdAt
       }
     });
   } catch (error) {
@@ -371,14 +412,14 @@ app.post('/api/login', async (req, res) => {
 // Get student ID file for a user - MUST come before /api/user/:id
 app.get('/api/user/:id/student-id', async (req, res) => {
   const userId = req.params.id;
-  
+
   try {
     const fileData = await getStudentIdFile(userId);
-    
+
     if (!fileData) {
       return res.status(404).json({ error: 'Not found' });
     }
-    
+
     res.setHeader('Content-Type', fileData.mimeType);
     res.setHeader('Content-Disposition', `inline; filename="${fileData.filename}"`);
     res.send(fileData.buffer);
@@ -393,7 +434,7 @@ app.get('/api/user/:id/student-id', async (req, res) => {
 app.get('/api/user/event-requests', async (req, res) => {
   try {
     const { userId, email } = req.query;
-    
+
     if (!userId && !email) {
       return res.status(400).json({ error: 'User ID or email is required' });
     }
@@ -427,15 +468,15 @@ app.get('/api/reviews', async (req, res) => {
 app.post('/api/reviews', async (req, res) => {
   try {
     const { rating, comment, userName } = req.body;
-    
+
     if (!rating || !userName) {
       return res.status(400).json({ error: 'Rating and name are required' });
     }
-    
+
     if (rating < 1 || rating > 5) {
       return res.status(400).json({ error: 'Rating must be between 1 and 5' });
     }
-    
+
     // Get user info if logged in
     let userId = null;
     let userEmail = null;
@@ -449,7 +490,7 @@ app.post('/api/reviews', async (req, res) => {
         // Not logged in, that's okay
       }
     }
-    
+
     const review = {
       id: `review_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       userId: userId,
@@ -460,7 +501,7 @@ app.post('/api/reviews', async (req, res) => {
       status: 'approved', // Auto-approve for now
       createdAt: new Date()
     };
-    
+
     const createdReview = await createReview(review);
     res.status(201).json(createdReview);
   } catch (error) {
@@ -476,14 +517,14 @@ app.get('/api/user/:id', async (req, res) => {
     if (req.params.id === 'event-requests') {
       return res.status(404).json({ error: 'Route not found' });
     }
-    
+
     console.log('User endpoint hit with id:', req.params.id);
     const user = await getUserById(req.params.id);
-    
+
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-    
+
     // Return user data without password (handle Oracle uppercase column names)
     const safeUser = {
       id: user.id || user.ID,
@@ -511,26 +552,26 @@ app.get('/api/events', async (req, res) => {
   try {
     const events = await readEvents();
     const { category, status, search } = req.query;
-    
+
     let filteredEvents = events;
-    
+
     if (category) {
       filteredEvents = filteredEvents.filter(e => e.category === category);
     }
-    
+
     if (status) {
       filteredEvents = filteredEvents.filter(e => e.status === status);
     }
-    
+
     if (search) {
       const searchLower = search.toLowerCase();
-      filteredEvents = filteredEvents.filter(e => 
+      filteredEvents = filteredEvents.filter(e =>
         (e.title || '').toString().toLowerCase().includes(searchLower) ||
         (e.description || '').toString().toLowerCase().includes(searchLower) ||
         (e.location || '').toString().toLowerCase().includes(searchLower)
       );
     }
-    
+
     res.json(filteredEvents);
   } catch (error) {
     console.error('Events error:', error);
@@ -542,11 +583,11 @@ app.get('/api/events', async (req, res) => {
 app.get('/api/events/:id', async (req, res) => {
   try {
     const event = await getEventById(req.params.id);
-    
+
     if (!event) {
       return res.status(404).json({ error: 'Event not found' });
     }
-    
+
     res.json(event);
   } catch (error) {
     console.error('Event error:', error);
@@ -558,7 +599,7 @@ app.get('/api/events/:id', async (req, res) => {
 app.post('/api/events/book', async (req, res) => {
   try {
     const { eventId, userId, userName, userEmail, isVolunteer, semester, batch, faculty, reason, paymentMethod } = req.body;
-    
+
     if (!eventId || !userId) {
       return res.status(400).json({ error: 'Event ID and User ID are required' });
     }
@@ -569,9 +610,9 @@ app.post('/api/events/book', async (req, res) => {
     }
 
     // Check if event is free or paid (handle both camelCase and uppercase)
-    const isFree = (event.isFree !== false && event.isFree !== 0) || 
-                   (event.IS_FREE !== false && event.IS_FREE !== 0) ||
-                   (event.isFree === true || event.IS_FREE === true);
+    const isFree = (event.isFree !== false && event.isFree !== 0) ||
+      (event.IS_FREE !== false && event.IS_FREE !== 0) ||
+      (event.isFree === true || event.IS_FREE === true);
     if (!isFree && !isVolunteer && !paymentMethod) {
       return res.status(400).json({ error: 'Payment method is required for paid events' });
     }
@@ -604,11 +645,11 @@ app.post('/api/events/book', async (req, res) => {
     const currentRegistered = event.registered || event.REGISTERED || 0;
     await updateEvent(eventId, { registered: currentRegistered + 1 });
 
-    res.status(201).json({ 
-      message: isVolunteer 
-        ? 'Volunteer application submitted successfully!' 
+    res.status(201).json({
+      message: isVolunteer
+        ? 'Volunteer application submitted successfully!'
         : (isFree ? 'Booking confirmed!' : 'Booking created. Please complete payment.'),
-      booking 
+      booking
     });
   } catch (error) {
     console.error('Booking error:', error);
@@ -624,18 +665,31 @@ app.post('/api/events/book', async (req, res) => {
 app.post('/api/admin/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    console.log('Login attempt - Email:', email, 'Password:', password);
+
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required.' });
     }
 
     const admin = await getAdminByEmail(email);
-    
+
+    console.log('Admin from DB:', admin);
+
     if (!admin) {
       return res.status(401).json({ error: 'Invalid credentials.' });
     }
 
-    const adminPassword = admin.password || admin.PASSWORD;
-    const isValid = await bcrypt.compare(password, adminPassword);
+    // Handle Oracle's uppercase column names
+    const adminPassword = admin.PASSWORD || admin.password;
+
+    console.log('Admin password from DB:', adminPassword);
+
+    // Direct comparison without hashing
+    const isValid = password === adminPassword;
+
+    console.log('Password match:', isValid);
+
     if (!isValid) {
       return res.status(401).json({ error: 'Invalid credentials.' });
     }
@@ -643,9 +697,9 @@ app.post('/api/admin/login', async (req, res) => {
     res.json({
       message: 'Login successful.',
       admin: {
-        id: admin.id,
-        name: admin.name,
-        email: admin.email
+        id: admin.ID || admin.id,
+        name: admin.NAME || admin.name,
+        email: admin.EMAIL || admin.email
       }
     });
   } catch (error) {
@@ -679,15 +733,15 @@ app.get('/api/admin/users', async (req, res) => {
 app.get('/api/admin/users/:id', async (req, res) => {
   try {
     const user = await getUserById(req.params.id);
-    
+
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-    
+
     // Check if file exists
     const hasFileName = !!(user.studentIdFileName || user.STUDENT_ID_FILE_NAME);
     const hasStudentIdFile = hasFileName;
-    
+
     // Remove password (handle Oracle column names)
     const safeUser = {
       id: user.id || user.ID,
@@ -711,11 +765,11 @@ app.patch('/api/admin/users/:id/verify', async (req, res) => {
   try {
     const { verified } = req.body;
     const user = await getUserById(req.params.id);
-    
+
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-    
+
     await updateUser(req.params.id, { verified: verified === true });
     res.json({ message: `User ${verified ? 'verified' : 'unverified'} successfully` });
   } catch (error) {
@@ -729,11 +783,11 @@ app.patch('/api/admin/events/:id', async (req, res) => {
   try {
     const { isFree, price, status } = req.body;
     const event = await getEventById(req.params.id);
-    
+
     if (!event) {
       return res.status(404).json({ error: 'Event not found' });
     }
-    
+
     const updates = {};
     if (isFree !== undefined) {
       updates.isFree = isFree === true;
@@ -750,7 +804,7 @@ app.patch('/api/admin/events/:id', async (req, res) => {
         return res.status(400).json({ error: 'Invalid status. Must be one of: upcoming, ongoing, past, cancelled' });
       }
     }
-    
+
     const updatedEvent = await updateEvent(req.params.id, updates);
     res.json({ message: 'Event updated successfully', event: updatedEvent });
   } catch (error) {
@@ -763,11 +817,11 @@ app.patch('/api/admin/events/:id', async (req, res) => {
 app.delete('/api/admin/events/:id', async (req, res) => {
   try {
     const event = await getEventById(req.params.id);
-    
+
     if (!event) {
       return res.status(404).json({ error: 'Event not found' });
     }
-    
+
     await deleteEvent(req.params.id);
     res.json({ message: 'Event deleted successfully' });
   } catch (error) {
@@ -781,11 +835,11 @@ app.post('/api/admin/events', uploadEventImage.single('image'), async (req, res)
   try {
     const { title, subtitle, description, details, category, date, time, location, venue, organizer, tags, price, isFree, capacity } = req.body;
     const imageFile = req.file;
-    
+
     if (!title || !description || !category || !date || !time || !location || !organizer) {
       return res.status(400).json({ error: 'Title, description, category, date, time, location, and organizer are required' });
     }
-    
+
     if (!imageFile) {
       return res.status(400).json({ error: 'Event image is required' });
     }
@@ -823,7 +877,7 @@ app.post('/api/admin/events', uploadEventImage.single('image'), async (req, res)
     };
 
     const createdEvent = await createEvent(newEvent);
-    
+
     res.status(201).json({ message: 'Event created successfully', event: createdEvent });
   } catch (error) {
     console.error('Create event error:', error);
@@ -839,7 +893,7 @@ app.post('/api/admin/events', uploadEventImage.single('image'), async (req, res)
 app.post('/api/events/request', async (req, res) => {
   try {
     const { title, subtitle, description, category, date, time, location, venue, organizer, requesterEmail, notes, userId } = req.body;
-    
+
     if (!title || !description || !category || !date || !time || !location || !organizer || !requesterEmail) {
       return res.status(400).json({ error: 'All required fields must be filled' });
     }
@@ -863,7 +917,7 @@ app.post('/api/events/request', async (req, res) => {
     };
 
     await createEventRequest(newRequest);
-    
+
     res.status(201).json({ message: 'Event request submitted successfully. Admin will review it soon.' });
   } catch (error) {
     console.error('Submit event request error:', error);
@@ -932,83 +986,83 @@ const timeout = (ms) => {
         res.status(504).json({ error: 'Request timeout' });
       }
     }, ms);
-    
+
     res.on('finish', () => clearTimeout(timer));
     next();
   };
 };
 
-app.post('/api/admin/event-requests/:id/approve', 
+app.post('/api/admin/event-requests/:id/approve',
   timeout(30000),
   uploadEventImage.single('image'),
-  handleMulterError, 
+  handleMulterError,
   async (req, res) => {
-  try {
-    const { price, isFree, capacity, tags } = req.body;
-    const imageFile = req.file;
-    
-    if (!imageFile) {
-      return res.status(400).json({ error: 'Event image is required' });
-    }
-    
-    const request = await getEventRequestById(req.params.id);
-    if (!request) {
-      return res.status(404).json({ error: 'Event request not found' });
-    }
-    
-    // Parse date to extract month, day, year
-    const requestDate = request.requestDate || request.REQUEST_DATE || request.date;
-    const eventDate = new Date(requestDate);
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const month = months[eventDate.getMonth()];
-    const day = eventDate.getDate().toString();
-    const year = eventDate.getFullYear().toString();
+    try {
+      const { price, isFree, capacity, tags } = req.body;
+      const imageFile = req.file;
 
-    // Create event from request
-    const newEvent = {
-      id: Date.now().toString(),
-      title: request.title || request.TITLE,
-      subtitle: request.subtitle || request.SUBTITLE || '',
-      description: request.description || request.DESCRIPTION,
-      details: request.notes || request.NOTES || '',
-      category: request.category || request.CATEGORY,
-      month,
-      day,
-      year,
-      date: requestDate,
-      time: request.requestTime || request.REQUEST_TIME || request.time,
-      location: request.location || request.LOCATION,
-      venue: request.venue || request.VENUE || '',
-      organizer: request.organizer || request.ORGANIZER,
-      image: imageFile ? `uploads/events/${imageFile.filename}` : 'assets/images/hero-event.png',
-      tags: tags ? (Array.isArray(tags) ? tags : (typeof tags === 'string' ? tags.split(',').map(t => t.trim()) : [])) : [],
-      price: (isFree === 'true' || isFree === true) ? 0 : (parseFloat(price) || 0),
-      isFree: (isFree === 'true' || isFree === true),
-      capacity: parseInt(capacity) || 0,
-      registered: 0,
-      status: 'upcoming',
-      createdAt: new Date()
-    };
-    
-    const createdEvent = await createEvent(newEvent);
+      if (!imageFile) {
+        return res.status(400).json({ error: 'Event image is required' });
+      }
 
-    // Update request status
-    await updateEventRequest(req.params.id, {
-      status: 'approved',
-      approvedAt: new Date(),
-      eventId: newEvent.id
-    });
-    
-    res.json({ message: 'Event request approved and event created', event: createdEvent });
-  } catch (error) {
-    console.error('Error approving event request:', error);
-    
-    // Make sure we always send a response
-    if (!res.headersSent) {
-      res.status(500).json({ error: error.message || 'Failed to approve event request' });
+      const request = await getEventRequestById(req.params.id);
+      if (!request) {
+        return res.status(404).json({ error: 'Event request not found' });
+      }
+
+      // Parse date to extract month, day, year
+      const requestDate = request.requestDate || request.REQUEST_DATE || request.date;
+      const eventDate = new Date(requestDate);
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const month = months[eventDate.getMonth()];
+      const day = eventDate.getDate().toString();
+      const year = eventDate.getFullYear().toString();
+
+      // Create event from request
+      const newEvent = {
+        id: Date.now().toString(),
+        title: request.title || request.TITLE,
+        subtitle: request.subtitle || request.SUBTITLE || '',
+        description: request.description || request.DESCRIPTION,
+        details: request.notes || request.NOTES || '',
+        category: request.category || request.CATEGORY,
+        month,
+        day,
+        year,
+        date: requestDate,
+        time: request.requestTime || request.REQUEST_TIME || request.time,
+        location: request.location || request.LOCATION,
+        venue: request.venue || request.VENUE || '',
+        organizer: request.organizer || request.ORGANIZER,
+        image: imageFile ? `uploads/events/${imageFile.filename}` : 'assets/images/hero-event.png',
+        tags: tags ? (Array.isArray(tags) ? tags : (typeof tags === 'string' ? tags.split(',').map(t => t.trim()) : [])) : [],
+        price: (isFree === 'true' || isFree === true) ? 0 : (parseFloat(price) || 0),
+        isFree: (isFree === 'true' || isFree === true),
+        capacity: parseInt(capacity) || 0,
+        registered: 0,
+        status: 'upcoming',
+        createdAt: new Date()
+      };
+
+      const createdEvent = await createEvent(newEvent);
+
+      // Update request status
+      await updateEventRequest(req.params.id, {
+        status: 'approved',
+        approvedAt: new Date(),
+        eventId: newEvent.id
+      });
+
+      res.json({ message: 'Event request approved and event created', event: createdEvent });
+    } catch (error) {
+      console.error('Error approving event request:', error);
+
+      // Make sure we always send a response
+      if (!res.headersSent) {
+        res.status(500).json({ error: error.message || 'Failed to approve event request' });
+      }
     }
-  }
-});
+  });
 
 // Reject event request (admin only)
 app.post('/api/admin/event-requests/:id/reject', async (req, res) => {
@@ -1022,7 +1076,7 @@ app.post('/api/admin/event-requests/:id/reject', async (req, res) => {
       status: 'rejected',
       rejectedAt: new Date()
     });
-    
+
     res.json({ message: 'Event request rejected' });
   } catch (error) {
     console.error('Reject event request error:', error);
@@ -1072,7 +1126,7 @@ async function startServer() {
     console.error('💡 Make sure Oracle database is running and connection details are correct in .env file');
     console.error('💡 You may need to install Oracle Instant Client: https://www.oracle.com/database/technologies/instant-client/downloads.html');
   }
-  
+
   // Start the server
   app.listen(PORT, () => {
     console.log(`🚀 UNI Events server running at http://localhost:${PORT}`);

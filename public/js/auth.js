@@ -117,20 +117,20 @@ const resolveApiBase = () => {
   if (typeof window.API_BASE !== 'undefined' && window.API_BASE) {
     return window.API_BASE;
   }
-  
+
   // Check for window.API_BASE_URL (set in HTML or Netlify)
   if (typeof window.API_BASE_URL !== 'undefined' && window.API_BASE_URL) {
     return window.API_BASE_URL;
   }
-  
+
   const origin = window.location.origin;
   const hostname = window.location.hostname;
-  
+
   // If hosted on Netlify
   if (hostname.includes('netlify.app') || hostname.includes('netlify.com')) {
     return 'https://your-backend.railway.app'; // Placeholder - MUST be updated
   }
-  
+
   if (origin.includes('5500') || origin.includes('127.0.0.1:5500')) {
     return 'http://localhost:4400';
   }
@@ -185,7 +185,7 @@ const setAlert = (element, message, type = 'info') => {
 registerForm?.addEventListener('submit', async (event) => {
   event.preventDefault();
   const formData = new FormData(registerForm);
-  
+
   // Check file size (max 5MB)
   const fileInput = registerForm.querySelector('input[type="file"]');
   if (fileInput.files[0]) {
@@ -198,7 +198,7 @@ registerForm?.addEventListener('submit', async (event) => {
 
   try {
     setAlert(registerAlert, 'Creating your account...', 'info');
-    
+
     // Send as FormData for file upload
     const response = await fetch(`${API_BASE}/api/register`, {
       method: 'POST',
@@ -209,7 +209,7 @@ registerForm?.addEventListener('submit', async (event) => {
     if (!response.ok) {
       throw new Error(result.error || 'Registration failed');
     }
-    
+
     setAlert(registerAlert, result.message || 'Registration successful! Your account is pending verification.', 'success');
     registerForm.reset();
   } catch (error) {
@@ -232,14 +232,14 @@ loginForm?.addEventListener('submit', async (event) => {
   try {
     setAlert(loginAlert, 'Verifying your credentials...', 'info');
     const result = await postJSON('/api/login', payload);
-    
+
     // Store user data in localStorage
     localStorage.setItem('user', JSON.stringify(result.user));
     localStorage.setItem('isLoggedIn', 'true');
-    
+
     setAlert(loginAlert, `Welcome back, ${result.user.name}!`, 'success');
     setTimeout(() => {
-      window.location.href = 'index.html';
+      window.location.href = 'profile.html';  // ← REDIRECT TO PROFILE
     }, 1200);
   } catch (error) {
     setAlert(loginAlert, error.message, 'error');
