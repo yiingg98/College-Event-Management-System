@@ -18,21 +18,21 @@ const resolveApiBase = () => {
   if (typeof window.API_BASE !== 'undefined' && window.API_BASE) {
     return window.API_BASE;
   }
-  
+
   // Check for window.API_BASE_URL (set in HTML or Netlify)
   if (typeof window.API_BASE_URL !== 'undefined' && window.API_BASE_URL) {
     return window.API_BASE_URL;
   }
-  
+
   const origin = window.location.origin;
   const port = window.location.port;
   const hostname = window.location.hostname;
-  
+
   // If hosted on Netlify
   if (hostname.includes('netlify.app') || hostname.includes('netlify.com')) {
     return 'https://your-backend.railway.app'; // Placeholder - MUST be updated
   }
-  
+
   // If using Live Server (port 5500, 5501, 5502, etc.) or file protocol
   if (port && (port.startsWith('55') || port === '5500' || port === '5501' || port === '5502')) {
     return 'http://localhost:4400';
@@ -61,7 +61,7 @@ const API_BASE = resolveApiBase();
  */
 function checkAdminAuth(skipAutoLogin = false) {
   const adminHeaderActions = document.getElementById('admin-header-actions');
-  
+
   // On initial page load, always show login form
   if (skipAutoLogin) {
     document.getElementById('admin-dashboard').style.display = 'none';
@@ -72,16 +72,16 @@ function checkAdminAuth(skipAutoLogin = false) {
     }
     return false;
   }
-  
+
   const adminData = localStorage.getItem('admin');
   const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
   const loginTimestamp = localStorage.getItem('adminLoginTimestamp');
-  
+
   // Check if session is still valid (within last 8 hours)
   const SESSION_DURATION = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
   const now = Date.now();
   const sessionValid = loginTimestamp && (now - parseInt(loginTimestamp)) < SESSION_DURATION;
-  
+
   if (isAdminLoggedIn && adminData && sessionValid) {
     const admin = JSON.parse(adminData);
     document.getElementById('admin-name').textContent = admin.name;
@@ -128,9 +128,11 @@ document.getElementById('admin-login-form')?.addEventListener('submit', async (e
 
     const response = await fetch(`${API_BASE}/api/admin/login`, {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
+
 
     // Check if response is JSON
     const contentType = response.headers.get('content-type') || '';
@@ -140,9 +142,9 @@ document.getElementById('admin-login-form')?.addEventListener('submit', async (e
       console.error('Non-JSON response received. First 300 chars:', text.substring(0, 300));
       throw new Error(`Server error: Received HTML instead of JSON. Status: ${response.status}. Please check: 1) Server is running on port 4400, 2) API endpoint exists, 3) No CORS issues.`);
     }
-    
+
     result = await response.json();
-    
+
     if (!response.ok) {
       throw new Error(result.error || 'Login failed');
     }
@@ -150,10 +152,10 @@ document.getElementById('admin-login-form')?.addEventListener('submit', async (e
     localStorage.setItem('admin', JSON.stringify(result.admin));
     localStorage.setItem('isAdminLoggedIn', 'true');
     localStorage.setItem('adminLoginTimestamp', Date.now().toString());
-    
+
     alert.textContent = 'Login successful!';
     alert.dataset.state = 'success';
-    
+
     setTimeout(() => {
       checkAdminAuth(); // This will show the header actions and dashboard
     }, 500);
@@ -174,7 +176,7 @@ async function loadUsers() {
   try {
     const response = await fetch(`${API_BASE}/api/admin/users`);
     if (!response.ok) throw new Error('Failed to load users');
-    
+
     const users = await response.json();
     renderUsers(users);
     updateStats(users);
@@ -183,7 +185,7 @@ async function loadUsers() {
     console.error('Error loading users:', error);
     const tbody = document.getElementById('users-table-body');
     if (tbody) {
-      tbody.innerHTML = 
+      tbody.innerHTML =
         '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #ff8a8a;">Failed to load users</td></tr>';
     }
     throw error;
@@ -196,7 +198,7 @@ async function loadUsers() {
  */
 function renderUsers(users) {
   const tbody = document.getElementById('users-table-body');
-  
+
   if (users.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">No users found</td></tr>';
     return;
@@ -251,7 +253,7 @@ function updateStats(users) {
   document.getElementById('stat-total-users').textContent = total;
   document.getElementById('stat-verified-users').textContent = verified;
   document.getElementById('stat-pending-users').textContent = pending;
-  
+
   // Update event and request stats
   updateEventStats();
   updateRequestStats();
@@ -267,7 +269,7 @@ async function updateEventStats() {
       const events = await response.json();
       const totalEvents = events.length;
       const ongoingEvents = events.filter(e => (e.status || e.STATUS || '').toLowerCase() === 'ongoing').length;
-      
+
       const totalEl = document.getElementById('stat-total-events');
       const ongoingEl = document.getElementById('stat-ongoing-events');
       if (totalEl) totalEl.textContent = totalEvents;
@@ -287,7 +289,7 @@ async function updateRequestStats() {
     if (response.ok) {
       const requests = await response.json();
       const pendingRequests = requests.filter(r => (r.status || r.STATUS || '').toLowerCase() === 'pending').length;
-      
+
       const pendingEl = document.getElementById('stat-pending-requests');
       if (pendingEl) pendingEl.textContent = pendingRequests;
     }
@@ -304,12 +306,12 @@ async function viewUser(userId) {
   try {
     const response = await fetch(`${API_BASE}/api/admin/users/${userId}`);
     if (!response.ok) throw new Error('Failed to load user');
-    
+
     const user = await response.json();
-    
+
     // Check if file exists
     const hasFile = !!(user.hasStudentIdFile || user.studentIdFileName);
-    
+
     const modalBody = document.getElementById('user-modal-body');
     modalBody.innerHTML = `
       <div class="user-detail-item">
@@ -362,7 +364,7 @@ async function viewUser(userId) {
         </div>
       </div>
     `;
-    
+
     document.getElementById('user-modal').style.display = 'flex';
   } catch (error) {
     console.error('Error loading user:', error);
@@ -406,22 +408,22 @@ async function verifyUser(userId, verified) {
     }
 
     const result = await response.json();
-    
+
     // Close modal if open
     const userModal = document.getElementById('user-modal');
     if (userModal) {
       userModal.style.display = 'none';
     }
-    
+
     // Reload users and wait for it to complete
     await loadUsers();
-    
+
     // Show success message briefly
     const successMsg = document.createElement('div');
     successMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #84f5c4; color: #000; padding: 1rem 1.5rem; border-radius: 8px; z-index: 10000; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
     successMsg.textContent = result.message || `User ${verified ? 'verified' : 'unverified'} successfully`;
     document.body.appendChild(successMsg);
-    
+
     setTimeout(() => {
       successMsg.remove();
     }, 3000);
@@ -431,11 +433,11 @@ async function verifyUser(userId, verified) {
     errorMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #ff8a8a; color: #fff; padding: 1rem 1.5rem; border-radius: 8px; z-index: 10000; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
     errorMsg.textContent = error.message || 'Failed to update user verification status';
     document.body.appendChild(errorMsg);
-    
+
     setTimeout(() => {
       errorMsg.remove();
     }, 3000);
-    
+
     // Reload users to restore state
     loadUsers();
   }
@@ -452,7 +454,7 @@ async function loadEvents() {
   try {
     const response = await fetch(`${API_BASE}/api/events`);
     if (!response.ok) throw new Error('Failed to load events');
-    
+
     const events = await response.json();
     renderEvents(events);
     updateEventStats(); // Update stats when events are loaded
@@ -461,7 +463,7 @@ async function loadEvents() {
     console.error('Error loading events:', error);
     const tbody = document.getElementById('events-table-body');
     if (tbody) {
-      tbody.innerHTML = 
+      tbody.innerHTML =
         '<tr><td colspan="4" style="text-align: center; padding: 2rem; color: #ff8a8a;">Failed to load events</td></tr>';
     }
     throw error;
@@ -474,7 +476,7 @@ async function loadEvents() {
  */
 function renderEvents(events) {
   const tbody = document.getElementById('events-table-body');
-  
+
   if (events.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">No events found</td></tr>';
     return;
@@ -483,12 +485,12 @@ function renderEvents(events) {
   tbody.innerHTML = events.map(event => {
     const isFree = event.isFree !== false;
     const status = (event.status || event.STATUS || 'upcoming').toLowerCase();
-    const statusClass = status === 'upcoming' ? 'profile-info-value--verified' : 
-                       status === 'ongoing' ? 'profile-info-value--verified' : 
-                       status === 'past' ? 'profile-info-value--unverified' : 
-                       'profile-info-value--unverified';
+    const statusClass = status === 'upcoming' ? 'profile-info-value--verified' :
+      status === 'ongoing' ? 'profile-info-value--verified' :
+        status === 'past' ? 'profile-info-value--unverified' :
+          'profile-info-value--unverified';
     const statusDisplay = status.charAt(0).toUpperCase() + status.slice(1);
-    
+
     return `
       <tr>
         <td><strong>${event.title}</strong><br><small style="color: rgba(255,255,255,0.6);">${event.subtitle}</small></td>
@@ -536,17 +538,17 @@ function renderEvents(events) {
 function openDeleteEventModal(eventId, eventTitle) {
   const modal = document.getElementById('delete-event-modal');
   const eventNameDisplay = document.getElementById('delete-event-name');
-  
+
   if (!modal) {
     console.error('Delete event modal not found');
     return;
   }
-  
+
   modal.dataset.eventId = eventId;
   if (eventNameDisplay) {
     eventNameDisplay.textContent = `"${eventTitle}"`;
   }
-  
+
   modal.style.display = 'flex';
 }
 
@@ -567,20 +569,20 @@ async function deleteEvent(eventId) {
     }
 
     const result = await response.json();
-    
+
     // Close modal
     const modal = document.getElementById('delete-event-modal');
     if (modal) modal.style.display = 'none';
-    
+
     // Reload events
     await loadEvents();
-    
+
     // Show success message
     const successMsg = document.createElement('div');
     successMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #84f5c4; color: #000; padding: 1rem 1.5rem; border-radius: 8px; z-index: 10000; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
     successMsg.textContent = result.message || 'Event deleted successfully';
     document.body.appendChild(successMsg);
-    
+
     setTimeout(() => {
       successMsg.remove();
     }, 3000);
@@ -590,7 +592,7 @@ async function deleteEvent(eventId) {
     errorMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #ff8a8a; color: #fff; padding: 1rem 1.5rem; border-radius: 8px; z-index: 10000; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
     errorMsg.textContent = error.message || 'Failed to delete event';
     document.body.appendChild(errorMsg);
-    
+
     setTimeout(() => {
       errorMsg.remove();
     }, 3000);
@@ -603,10 +605,10 @@ function editEvent(eventId, isFree, price, status) {
   const priceField = document.getElementById('edit-price-field');
   const priceInput = document.getElementById('edit-price');
   const statusSelect = document.getElementById('edit-status');
-  
+
   // Store event ID
   form.dataset.eventId = eventId;
-  
+
   // Set initial values
   if (isFree) {
     document.getElementById('edit-is-free-true').checked = true;
@@ -618,14 +620,14 @@ function editEvent(eventId, isFree, price, status) {
     priceInput.required = true;
   }
   priceInput.value = price || 0;
-  
+
   // Set status
   if (statusSelect && status) {
     statusSelect.value = status;
   } else if (statusSelect) {
     statusSelect.value = 'upcoming'; // Default
   }
-  
+
   // Show/hide price field based on event type
   const freeRadios = form.querySelectorAll('input[name="isFree"]');
   freeRadios.forEach(radio => {
@@ -640,7 +642,7 @@ function editEvent(eventId, isFree, price, status) {
       }
     });
   });
-  
+
   modal.style.display = 'flex';
 }
 
@@ -685,7 +687,7 @@ async function loadEventRequests() {
   try {
     const response = await fetch(`${API_BASE}/api/admin/event-requests`);
     if (!response.ok) throw new Error('Failed to load event requests');
-    
+
     const requests = await response.json();
     renderEventRequests(requests);
     updateRequestStats(); // Update stats when requests are loaded
@@ -694,7 +696,7 @@ async function loadEventRequests() {
     console.error('Error loading event requests:', error);
     const tbody = document.getElementById('event-requests-table-body');
     if (tbody) {
-      tbody.innerHTML = 
+      tbody.innerHTML =
         '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: #ff8a8a;">Failed to load event requests</td></tr>';
     }
     throw error;
@@ -708,17 +710,17 @@ async function loadContactRequests() {
   try {
     const response = await fetch(`${API_BASE}/api/admin/contact-requests`);
     if (!response.ok) throw new Error('Failed to load contact requests');
-    
+
     const requests = await response.json();
-    
-    
+
+
     renderContactRequests(requests);
     return requests;
   } catch (error) {
     console.error('Error loading contact requests:', error);
     const tbody = document.getElementById('contact-requests-table-body');
     if (tbody) {
-      tbody.innerHTML = 
+      tbody.innerHTML =
         '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #ff8a8a;">Failed to load contact requests</td></tr>';
     }
     throw error;
@@ -730,17 +732,17 @@ async function loadContactRequests() {
  */
 function renderContactRequests(requests) {
   const tbody = document.getElementById('contact-requests-table-body');
-  
+
   if (requests.length === 0) {
     tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">No contact requests yet</td></tr>';
     return;
   }
-  
+
   tbody.innerHTML = requests.map(request => {
     const status = (request.status || request.STATUS || 'new').toLowerCase();
     const statusClass = status === 'new' ? 'status-new' : status === 'read' ? 'status-read' : status === 'replied' ? 'status-approved' : 'status-rejected';
     const statusText = status.charAt(0).toUpperCase() + status.slice(1);
-    
+
     const createdAt = request.createdAt || request.CREATED_AT || new Date();
     const date = new Date(createdAt);
     const formattedDate = date.toLocaleDateString('en-US', {
@@ -750,7 +752,7 @@ function renderContactRequests(requests) {
       hour: '2-digit',
       minute: '2-digit'
     });
-    
+
     // Safely convert message to string
     let message = '';
     if (request.message || request.MESSAGE) {
@@ -770,7 +772,7 @@ function renderContactRequests(requests) {
       }
     }
     const messagePreview = message.length > 100 ? message.substring(0, 100) + '...' : message;
-    
+
     return `
       <tr>
         <td>${request.name || request.NAME || 'N/A'}</td>
@@ -802,7 +804,7 @@ function renderContactRequests(requests) {
 /**
  * Views a contact request in a modal
  */
-window.viewContactRequest = async function(requestId) {
+window.viewContactRequest = async function (requestId) {
   try {
     const requests = await loadContactRequests();
     const request = requests.find(r => (r.id || r.ID) === requestId);
@@ -810,7 +812,7 @@ window.viewContactRequest = async function(requestId) {
       alert('Contact request not found');
       return;
     }
-    
+
     // Safely convert message to string
     let message = '';
     if (request.message || request.MESSAGE) {
@@ -829,13 +831,13 @@ window.viewContactRequest = async function(requestId) {
         }
       }
     }
-    
+
     // Populate modal
     document.getElementById('contact-request-name').textContent = request.name || request.NAME || 'N/A';
     document.getElementById('contact-request-email').textContent = request.email || request.EMAIL || 'N/A';
     document.getElementById('contact-request-subject').textContent = request.subject || request.SUBJECT || 'No subject';
     document.getElementById('contact-request-message').textContent = message || 'No message';
-    
+
     const createdAt = request.createdAt || request.CREATED_AT || new Date();
     const date = new Date(createdAt);
     const formattedDate = date.toLocaleDateString('en-US', {
@@ -846,14 +848,14 @@ window.viewContactRequest = async function(requestId) {
       minute: '2-digit'
     });
     document.getElementById('contact-request-date').textContent = formattedDate;
-    
+
     const status = (request.status || request.STATUS || 'new').toLowerCase();
     const statusText = status.charAt(0).toUpperCase() + status.slice(1);
     document.getElementById('contact-request-status').textContent = statusText;
-    
+
     // Show modal
     document.getElementById('contact-request-modal').style.display = 'flex';
-    
+
     // Mark as read if it's new
     if (status === 'new') {
       await markContactRequestAsRead(requestId);
@@ -867,16 +869,16 @@ window.viewContactRequest = async function(requestId) {
 /**
  * Marks a contact request as read
  */
-window.markContactRequestAsRead = async function(requestId) {
+window.markContactRequestAsRead = async function (requestId) {
   try {
     const response = await fetch(`${API_BASE}/api/admin/contact-requests/${requestId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'read' })
     });
-    
+
     if (!response.ok) throw new Error('Failed to update contact request');
-    
+
     await loadContactRequests();
   } catch (error) {
     console.error('Error updating contact request:', error);
@@ -890,7 +892,7 @@ window.markContactRequestAsRead = async function(requestId) {
  */
 function renderEventRequests(requests) {
   const tbody = document.getElementById('event-requests-table-body');
-  
+
   if (requests.length === 0) {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">No event requests found</td></tr>';
     return;
@@ -904,11 +906,11 @@ function renderEventRequests(requests) {
     const requesterEmail = request.requesterEmail || request.REQUESTER_EMAIL || request.requester_email || 'Unknown';
     const requestDate = request.requestDate || request.REQUEST_DATE || request.request_date || request.date || request.DATE;
     const status = (request.status || request.STATUS || 'pending').toLowerCase();
-    
-    const statusClass = status === 'approved' ? 'profile-info-value--verified' : 
-                       status === 'rejected' ? 'profile-info-value--unverified' : 
-                       'profile-info-value--unverified';
-    
+
+    const statusClass = status === 'approved' ? 'profile-info-value--verified' :
+      status === 'rejected' ? 'profile-info-value--unverified' :
+        'profile-info-value--unverified';
+
     // Format date safely
     let dateDisplay = 'Invalid Date';
     if (requestDate) {
@@ -921,7 +923,7 @@ function renderEventRequests(requests) {
         // Keep default "Invalid Date"
       }
     }
-    
+
     return `
       <tr>
         <td><strong>${title}</strong><br><small style="color: rgba(255,255,255,0.6);">${subtitle}</small></td>
@@ -968,16 +970,16 @@ async function viewEventRequest(requestId) {
   try {
     const response = await fetch(`${API_BASE}/api/admin/event-requests`);
     if (!response.ok) throw new Error('Failed to load event requests');
-    
+
     const requests = await response.json();
     // Handle both id and ID (normalized and Oracle formats)
     const request = requests.find(r => (r.id || r.ID) === requestId);
-    
+
     if (!request) {
       alert('Event request not found');
       return;
     }
-    
+
     // Show request details in a modal (similar to user modal)
     const modal = document.createElement('div');
     modal.className = 'user-modal';
@@ -1011,15 +1013,15 @@ async function viewEventRequest(requestId) {
         <div class="user-detail-item">
           <div class="user-detail-label">Date & Time</div>
           <div class="user-detail-value">${(() => {
-            const date = request.requestDate || request.REQUEST_DATE || request.date || request.DATE;
-            const time = request.requestTime || request.REQUEST_TIME || request.time || request.TIME;
-            try {
-              const dateObj = new Date(date);
-              return !isNaN(dateObj.getTime()) ? dateObj.toLocaleDateString() + (time ? ` at ${time}` : '') : 'Invalid Date';
-            } catch (e) {
-              return 'Invalid Date';
-            }
-          })()}</div>
+        const date = request.requestDate || request.REQUEST_DATE || request.date || request.DATE;
+        const time = request.requestTime || request.REQUEST_TIME || request.time || request.TIME;
+        try {
+          const dateObj = new Date(date);
+          return !isNaN(dateObj.getTime()) ? dateObj.toLocaleDateString() + (time ? ` at ${time}` : '') : 'Invalid Date';
+        } catch (e) {
+          return 'Invalid Date';
+        }
+      })()}</div>
         </div>
         <div class="user-detail-item">
           <div class="user-detail-label">Location</div>
@@ -1065,7 +1067,7 @@ async function viewEventRequest(requestId) {
       </div>
     `;
     document.body.appendChild(modal);
-    
+
     // Close on overlay click
     modal.addEventListener('click', (e) => {
       if (e.target === modal) modal.remove();
@@ -1088,28 +1090,28 @@ function openApproveModal(requestId) {
   const imageInput = document.getElementById('event-image');
   const imagePreview = document.getElementById('image-preview');
   const previewImg = document.getElementById('preview-img');
-  
+
   // Store request ID in form data
   form.dataset.requestId = requestId;
-  
+
   if (!modal || !form) {
     console.error('Approve modal or form not found');
     return;
   }
-  
+
   // Reset form
   form.reset();
   if (imagePreview) imagePreview.style.display = 'none';
   if (priceField) priceField.style.display = 'none';
   if (priceInput) priceInput.required = false;
-  
+
   // Show/hide price field based on event type
   const freeRadios = form.querySelectorAll('input[name="isFree"]');
   freeRadios.forEach(radio => {
     // Remove old listeners to prevent duplicates
     const newRadio = radio.cloneNode(true);
     radio.parentNode.replaceChild(newRadio, radio);
-    
+
     newRadio.addEventListener('change', () => {
       if (newRadio.value === 'false') {
         if (priceField) priceField.style.display = 'block';
@@ -1123,16 +1125,16 @@ function openApproveModal(requestId) {
       }
     });
   });
-  
+
   // Image preview - remove old listener and add new one
   if (imageInput) {
     // Remove old listeners
     const newInput = imageInput.cloneNode(true);
     imageInput.parentNode.replaceChild(newInput, imageInput);
-    
+
     newInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
-      
+
       if (file) {
         // Validate file size (5MB)
         if (file.size > 5 * 1024 * 1024) {
@@ -1141,7 +1143,7 @@ function openApproveModal(requestId) {
           if (imagePreview) imagePreview.style.display = 'none';
           return;
         }
-        
+
         // Validate file type
         if (!file.type.match(/^image\/(jpeg|jpg|png)$/i)) {
           alert('Please upload a JPEG or PNG image');
@@ -1149,7 +1151,7 @@ function openApproveModal(requestId) {
           if (imagePreview) imagePreview.style.display = 'none';
           return;
         }
-        
+
         const reader = new FileReader();
         reader.onload = (e) => {
           if (previewImg) previewImg.src = e.target.result;
@@ -1161,7 +1163,7 @@ function openApproveModal(requestId) {
       }
     });
   }
-  
+
   modal.style.display = 'flex';
 }
 
@@ -1177,12 +1179,12 @@ async function approveEventRequest(requestId) {
   const alert = document.querySelector('[data-approve-alert]');
   const modal = document.getElementById('approve-event-modal');
   const submitBtn = form?.querySelector('button[type="submit"]');
-  
+
   if (!form) {
     console.error('Approve form not found');
     return;
   }
-  
+
   if (!requestId) {
     console.error('Request ID is missing');
     if (alert) {
@@ -1192,12 +1194,12 @@ async function approveEventRequest(requestId) {
     }
     return;
   }
-  
+
   // Prevent duplicate submissions
   if (isApproving) {
     return;
   }
-  
+
   try {
     isApproving = true;
     if (submitBtn) {
@@ -1209,44 +1211,44 @@ async function approveEventRequest(requestId) {
       alert.dataset.state = 'info';
       alert.style.display = 'block';
     }
-    
+
     const formData = new FormData(form);
     const isFree = formData.get('isFree') === 'true';
     const price = isFree ? 0 : parseFloat(formData.get('price')) || 0;
     const capacity = parseInt(formData.get('capacity')) || 0;
     const tags = formData.get('tags') || '';
-    
+
     // Get image file from the file input directly
     const imageInput = document.getElementById('event-image');
     const imageFile = imageInput?.files?.[0];
-    
-    
+
+
     if (!imageFile) {
       throw new Error('Please upload an event image');
     }
-    
+
     if (imageFile.size === 0) {
       throw new Error('The selected image file is empty. Please choose a different image.');
     }
-    
+
     // Validate file size (5MB)
     if (imageFile.size > 5 * 1024 * 1024) {
       throw new Error('Image file size must be less than 5MB');
     }
-    
+
     // Validate file type
     if (!imageFile.type.match(/^image\/(jpeg|jpg|png)$/i)) {
       throw new Error('Please upload a JPEG or PNG image file');
     }
-    
+
     if (!isFree && (!price || price <= 0)) {
       throw new Error('Please enter a valid price for paid events');
     }
-    
+
     if (!capacity || capacity <= 0) {
       throw new Error('Please enter a valid capacity');
     }
-    
+
     // Create FormData for file upload
     const uploadData = new FormData();
     uploadData.append('isFree', isFree ? 'true' : 'false'); // Ensure it's a string
@@ -1273,12 +1275,12 @@ async function approveEventRequest(requestId) {
     }
 
     const result = await response.json();
-    
+
     if (alert) {
       alert.textContent = '✅ Event approved and created successfully!';
       alert.dataset.state = 'success';
     }
-    
+
     // Close modal after 1.5 seconds
     setTimeout(() => {
       if (modal) modal.style.display = 'none';
@@ -1291,39 +1293,39 @@ async function approveEventRequest(requestId) {
         submitBtn.textContent = 'Approve & Create Event';
       }
     }, 1500);
-    
+
     // Reload event requests and events
     await Promise.all([loadEventRequests(), loadEvents()]);
-    
+
     // Show success message
     const successMsg = document.createElement('div');
     successMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #84f5c4; color: #000; padding: 1rem 1.5rem; border-radius: 8px; z-index: 10000; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
     successMsg.textContent = result.message || 'Event request approved and event created';
     document.body.appendChild(successMsg);
-    
+
     setTimeout(() => {
       successMsg.remove();
     }, 3000);
   } catch (error) {
     console.error('Error approving event request:', error);
     isApproving = false;
-    
+
     if (submitBtn) {
       submitBtn.disabled = false;
       submitBtn.textContent = 'Approve & Create Event';
     }
-    
+
     if (alert) {
       alert.textContent = `❌ ${error.message || 'Failed to approve event request'}`;
       alert.dataset.state = 'error';
       alert.style.display = 'block';
     }
-    
+
     const errorMsg = document.createElement('div');
     errorMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #ff8a8a; color: #fff; padding: 1rem 1.5rem; border-radius: 8px; z-index: 10000; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
     errorMsg.textContent = error.message || 'Failed to approve event request';
     document.body.appendChild(errorMsg);
-    
+
     setTimeout(() => {
       errorMsg.remove();
     }, 5000);
@@ -1343,11 +1345,11 @@ function openRejectModal(requestId) {
 async function confirmRejectRequest() {
   const modal = document.getElementById('reject-confirm-modal');
   const requestId = modal.dataset.requestId;
-  
+
   if (!requestId) return;
-  
+
   modal.style.display = 'none';
-  
+
   try {
     const response = await fetch(`${API_BASE}/api/admin/event-requests/${requestId}/reject`, {
       method: 'POST',
@@ -1360,13 +1362,13 @@ async function confirmRejectRequest() {
     }
 
     await loadEventRequests();
-    
+
     // Show success message
     const successMsg = document.createElement('div');
     successMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #84f5c4; color: #000; padding: 1rem 1.5rem; border-radius: 8px; z-index: 10000; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
     successMsg.textContent = 'Event request rejected';
     document.body.appendChild(successMsg);
-    
+
     setTimeout(() => {
       successMsg.remove();
     }, 3000);
@@ -1376,7 +1378,7 @@ async function confirmRejectRequest() {
     errorMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #ff8a8a; color: #fff; padding: 1rem 1.5rem; border-radius: 8px; z-index: 10000; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
     errorMsg.textContent = error.message || 'Failed to reject event request';
     document.body.appendChild(errorMsg);
-    
+
     setTimeout(() => {
       errorMsg.remove();
     }, 3000);
@@ -1402,21 +1404,21 @@ function openAddEventModal() {
   const imageInput = document.getElementById('add-event-image');
   const imagePreview = document.getElementById('add-image-preview');
   const previewImg = document.getElementById('add-preview-img');
-  
+
   // Reset form
   form.reset();
   if (imagePreview) imagePreview.style.display = 'none';
   if (priceField) priceField.style.display = 'none';
   const priceInput = document.getElementById('add-price');
   if (priceInput) priceInput.required = false;
-  
+
   // Show/hide price field based on event type
   const freeRadios = form.querySelectorAll('input[name="isFree"]');
   freeRadios.forEach(radio => {
     // Remove old listeners to prevent duplicates
     const newRadio = radio.cloneNode(true);
     radio.parentNode.replaceChild(newRadio, radio);
-    
+
     newRadio.addEventListener('change', () => {
       if (newRadio.value === 'false') {
         if (priceField) priceField.style.display = 'block';
@@ -1430,13 +1432,13 @@ function openAddEventModal() {
       }
     });
   });
-  
+
   // Image preview - remove old listener and add new one
   if (imageInput) {
     // Remove old listeners
     const newInput = imageInput.cloneNode(true);
     imageInput.parentNode.replaceChild(newInput, imageInput);
-    
+
     newInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (file) {
@@ -1447,7 +1449,7 @@ function openAddEventModal() {
           if (imagePreview) imagePreview.style.display = 'none';
           return;
         }
-        
+
         // Validate file type
         if (!file.type.match('image/(jpeg|jpg|png)')) {
           alert('Please upload a JPEG or PNG image');
@@ -1455,7 +1457,7 @@ function openAddEventModal() {
           if (imagePreview) imagePreview.style.display = 'none';
           return;
         }
-        
+
         const reader = new FileReader();
         reader.onload = (e) => {
           if (previewImg) previewImg.src = e.target.result;
@@ -1467,7 +1469,7 @@ function openAddEventModal() {
       }
     });
   }
-  
+
   modal.style.display = 'flex';
 }
 
@@ -1479,7 +1481,7 @@ function closeAddEventModal() {
   const form = document.getElementById('add-event-form');
   const imagePreview = document.getElementById('add-image-preview');
   const alert = document.querySelector('[data-add-event-alert]');
-  
+
   if (modal) modal.style.display = 'none';
   if (form) form.reset();
   if (imagePreview) imagePreview.style.display = 'none';
@@ -1510,13 +1512,13 @@ window.closeAddEventModal = closeAddEventModal;
 document.addEventListener('DOMContentLoaded', () => {
   // On initial page load, always show login form (skip auto-login)
   checkAdminAuth(true);
-  
+
   // Approval modal event listeners
   const approveModal = document.getElementById('approve-event-modal');
   const approveForm = document.getElementById('approve-event-form');
   const closeApproveBtn = document.getElementById('close-approve-modal');
   const cancelApproveBtn = document.getElementById('cancel-approve-btn');
-  
+
   if (closeApproveBtn) {
     closeApproveBtn.addEventListener('click', () => {
       if (approveModal) approveModal.style.display = 'none';
@@ -1525,7 +1527,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (preview) preview.style.display = 'none';
     });
   }
-  
+
   if (cancelApproveBtn) {
     cancelApproveBtn.addEventListener('click', () => {
       if (approveModal) approveModal.style.display = 'none';
@@ -1534,7 +1536,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (preview) preview.style.display = 'none';
     });
   }
-  
+
   if (approveModal) {
     approveModal.addEventListener('click', (e) => {
       if (e.target === approveModal) {
@@ -1545,21 +1547,21 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-  
+
   if (approveForm) {
     // Remove any existing listeners to prevent duplicates
     const newForm = approveForm.cloneNode(true);
     approveForm.parentNode.replaceChild(newForm, approveForm);
-    
+
     // Get the new form reference
     const formToUse = document.getElementById('approve-event-form');
-    
+
     formToUse.addEventListener('submit', async (e) => {
       e.preventDefault();
       e.stopPropagation();
-      
+
       const requestId = formToUse.dataset.requestId;
-      
+
       if (requestId) {
         await approveEventRequest(requestId);
       } else {
@@ -1573,27 +1575,27 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-  
+
   // Edit Event Modal event listeners
   const editEventModal = document.getElementById('edit-event-modal');
   const editEventForm = document.getElementById('edit-event-form');
   const closeEditEventBtn = document.getElementById('close-edit-event-modal');
   const cancelEditEventBtn = document.getElementById('cancel-edit-event-btn');
-  
+
   if (closeEditEventBtn) {
     closeEditEventBtn.addEventListener('click', () => {
       if (editEventModal) editEventModal.style.display = 'none';
       if (editEventForm) editEventForm.reset();
     });
   }
-  
+
   if (cancelEditEventBtn) {
     cancelEditEventBtn.addEventListener('click', () => {
       if (editEventModal) editEventModal.style.display = 'none';
       if (editEventForm) editEventForm.reset();
     });
   }
-  
+
   if (editEventModal) {
     editEventModal.addEventListener('click', (e) => {
       if (e.target === editEventModal) {
@@ -1602,17 +1604,17 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-  
+
   if (editEventForm) {
     editEventForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const eventId = editEventForm.dataset.eventId;
       if (!eventId) return;
-      
+
       const alert = document.querySelector('[data-edit-event-alert]');
       const submitBtn = e.target.querySelector('button[type="submit"]');
       const originalText = submitBtn.textContent;
-      
+
       try {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Saving...';
@@ -1621,41 +1623,42 @@ document.addEventListener('DOMContentLoaded', () => {
           alert.dataset.state = 'info';
           alert.style.display = 'block';
         }
-        
+
         const isFree = document.getElementById('edit-is-free-true').checked;
         const price = isFree ? 0 : parseFloat(document.getElementById('edit-price').value) || 0;
         const status = document.getElementById('edit-status').value || 'upcoming';
-        
+
         const response = await fetch(`${API_BASE}/api/admin/events/${eventId}`, {
           method: 'PATCH',
+          credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ isFree, price, status })
         });
-        
+
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ error: 'Failed to update event' }));
           throw new Error(errorData.error || 'Failed to update event');
         }
-        
+
         const result = await response.json();
-        
+
         if (alert) {
           alert.textContent = '✅ Event updated successfully!';
           alert.dataset.state = 'success';
         }
-        
+
         setTimeout(() => {
           editEventModal.style.display = 'none';
           editEventForm.reset();
         }, 1500);
-        
+
         await loadEvents();
-        
+
         const successMsg = document.createElement('div');
         successMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #84f5c4; color: #000; padding: 1rem 1.5rem; border-radius: 8px; z-index: 10000; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
         successMsg.textContent = result.message || 'Event updated successfully';
         document.body.appendChild(successMsg);
-        
+
         setTimeout(() => {
           successMsg.remove();
         }, 3000);
@@ -1663,7 +1666,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error(error);
         submitBtn.disabled = false;
         submitBtn.textContent = originalText;
-        
+
         if (alert) {
           alert.textContent = `❌ ${error.message || 'Failed to update event'}`;
           alert.dataset.state = 'error';
@@ -1672,25 +1675,25 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-  
+
   // Delete Event Modal event listeners
   const deleteEventModal = document.getElementById('delete-event-modal');
   const closeDeleteEventBtn = document.getElementById('close-delete-event-modal');
   const cancelDeleteEventBtn = document.getElementById('cancel-delete-event-btn');
   const confirmDeleteEventBtn = document.getElementById('confirm-delete-event-btn');
-  
+
   if (closeDeleteEventBtn) {
     closeDeleteEventBtn.addEventListener('click', () => {
       if (deleteEventModal) deleteEventModal.style.display = 'none';
     });
   }
-  
+
   if (cancelDeleteEventBtn) {
     cancelDeleteEventBtn.addEventListener('click', () => {
       if (deleteEventModal) deleteEventModal.style.display = 'none';
     });
   }
-  
+
   if (confirmDeleteEventBtn) {
     confirmDeleteEventBtn.addEventListener('click', async () => {
       const eventId = deleteEventModal?.dataset?.eventId;
@@ -1699,7 +1702,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-  
+
   if (deleteEventModal) {
     deleteEventModal.addEventListener('click', (e) => {
       if (e.target === deleteEventModal) {
@@ -1712,13 +1715,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const contactRequestModal = document.getElementById('contact-request-modal');
   const closeContactRequestModalBtn = document.getElementById('close-contact-request-modal');
   const closeContactRequestModalBtn2 = document.getElementById('close-contact-request-modal-btn');
-  
+
   function closeContactRequestModal() {
     if (contactRequestModal) {
       contactRequestModal.style.display = 'none';
     }
   }
-  
+
   if (closeContactRequestModalBtn) {
     closeContactRequestModalBtn.addEventListener('click', closeContactRequestModal);
   }
@@ -1729,6 +1732,76 @@ document.addEventListener('DOMContentLoaded', () => {
     contactRequestModal.addEventListener('click', (e) => {
       if (e.target === contactRequestModal) {
         closeContactRequestModal();
+      }
+    });
+  }
+  // Add Event Form Submit Handler
+  const addEventForm = document.getElementById('add-event-form');
+  if (addEventForm) {
+    addEventForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const alert = document.querySelector('[data-add-event-alert]');
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn?.textContent || 'Create Event';
+
+      try {
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Creating...';
+        }
+        if (alert) {
+          alert.textContent = 'Creating event...';
+          alert.dataset.state = 'info';
+          alert.style.display = 'block';
+        }
+
+        const formData = new FormData(e.target);
+
+        const response = await fetch(`${API_BASE}/api/admin/events`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Failed to create event' }));
+          throw new Error(errorData.error || 'Failed to create event');
+        }
+
+        const result = await response.json();
+
+        if (alert) {
+          alert.textContent = '✅ Event created successfully!';
+          alert.dataset.state = 'success';
+        }
+
+        setTimeout(() => {
+          closeAddEventModal();
+        }, 1500);
+
+        await loadEvents();
+
+        const successMsg = document.createElement('div');
+        successMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #84f5c4; color: #000; padding: 1rem 1.5rem; border-radius: 8px; z-index: 10000; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
+        successMsg.textContent = result.message || 'Event created successfully';
+        document.body.appendChild(successMsg);
+
+        setTimeout(() => {
+          successMsg.remove();
+        }, 3000);
+      } catch (error) {
+        console.error('Error creating event:', error);
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+        }
+
+        if (alert) {
+          alert.textContent = `❌ ${error.message || 'Failed to create event'}`;
+          alert.dataset.state = 'error';
+          alert.style.display = 'block';
+        }
       }
     });
   }

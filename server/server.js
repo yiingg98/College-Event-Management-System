@@ -13,6 +13,7 @@
 // ============================================================================
 
 const express = require('express');
+const session = require('express-session');
 const path = require('path');
 const fs = require('fs/promises');
 const bcrypt = require('bcryptjs');
@@ -56,6 +57,19 @@ app.use((req, res, next) => {
   }
   express.json()(req, res, next);
 });
+// ================= SESSION SETUP =================
+app.use(session({
+  name: 'admin.sid',            // cookie name
+  secret: 'super-secret-key',   // change to any string
+  resave: false,
+  saveUninitialized: false,     // VERY IMPORTANT
+  cookie: {
+    httpOnly: true,
+    secure: false,              // must be false on localhost
+    sameSite: 'lax',            // REQUIRED for local development
+    maxAge: 1000 * 60 * 60 * 2  // 2 hours
+  }
+}));
 
 app.use(express.static(PUBLIC_DIR));
 app.use('/uploads', express.static(UPLOADS_DIR));
@@ -121,7 +135,7 @@ const uploadEventImage = multer({
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit (increased from 5MB)
     fieldSize: 10 * 1024 * 1024, // 10MB for fields
-    fields: 10, // Max number of non-file fields
+    fields: 30, // Max number of non-file fields
     files: 1 // Max number of files
   },
   fileFilter: (req, file, cb) => {
