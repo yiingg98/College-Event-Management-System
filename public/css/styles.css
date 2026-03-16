@@ -610,7 +610,6 @@ main {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   transform: rotate(0deg);
-  /* ← CHANGED */
   box-shadow: 0 2px 4px rgba(245, 22, 126, 0.3);
 }
 
@@ -618,7 +617,6 @@ main {
   padding: 0.15rem 0.5rem;
   font-size: 0.65rem;
   transform: rotate(0deg);
-  /* ← CHANGED */
 }
 
 .event-card__badge::before {
